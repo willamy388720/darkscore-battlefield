@@ -229,6 +229,7 @@ const MatchDetails = () => {
                               src={player.photoURL || "/placeholder.svg"}
                               alt={player.name}
                               className="w-6 h-6 rounded-full mr-2 border border-neon-purple/30"
+                              crossOrigin="anonymous"
                             />
                             <span className="text-white">{player.name}</span>
                           </div>
