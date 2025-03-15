@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useMatch } from "../contexts/MatchContext";
@@ -33,14 +32,14 @@ const MatchControls = ({ matchId }: MatchControlsProps) => {
       setIsResetting(true);
       await resetScores(matchId);
       toast({
-        title: "Scores Reset",
-        description: "All player scores have been reset to zero.",
+        title: "Scores Redefinidos",
+        description: "Todas os scores dos jogadores foram zeradas.",
       });
     } catch (error) {
       console.error("Error resetting scores:", error);
       toast({
-        title: "Error",
-        description: "Failed to reset scores. Please try again.",
+        title: "Erro",
+        description: "Falha ao redefinir os scores. Tente novamente.",
         variant: "destructive",
       });
     } finally {
@@ -53,15 +52,15 @@ const MatchControls = ({ matchId }: MatchControlsProps) => {
       setIsEnding(true);
       await endMatch(matchId);
       toast({
-        title: "Match Ended",
-        description: "The match has been moved to history.",
+        title: "Partida encerrada",
+        description: "A partida foi movida para o histórico.",
       });
       navigate("/dashboard");
     } catch (error) {
       console.error("Error ending match:", error);
       toast({
-        title: "Error",
-        description: "Failed to end match. Please try again.",
+        title: "Erro",
+        description: "Falha ao finalizar a partida. Tente novamente.",
         variant: "destructive",
       });
       setIsEnding(false);
@@ -76,35 +75,38 @@ const MatchControls = ({ matchId }: MatchControlsProps) => {
         className="game-button flex-1 flex items-center justify-center gap-2"
       >
         <RefreshCw size={16} />
-        <span>{isResetting ? "Resetting..." : "Reset Scores"}</span>
+        <span>{isResetting ? "Redefinindo..." : "Redefinir Scores"}</span>
       </Button>
 
       <AlertDialog>
         <AlertDialogTrigger asChild>
           <Button className="game-button bg-destructive/20 hover:bg-destructive/30 border-destructive/50 flex-1 flex items-center justify-center gap-2">
             <X size={16} />
-            <span>End Match</span>
+            <span>Finalizar Partida</span>
           </Button>
         </AlertDialogTrigger>
         <AlertDialogContent className="bg-background border-neon-purple/30">
           <AlertDialogHeader>
             <AlertDialogTitle className="font-cyber text-white flex items-center gap-2">
               <AlertTriangle size={20} className="text-destructive" />
-              End Match?
+              Finalizar Partida?
             </AlertDialogTitle>
             <AlertDialogDescription className="text-muted-foreground">
-              This will end the current match and move it to history. 
-              Player scores will be preserved. This action cannot be undone.
+              Isso encerrará a partida atual e a moverá para o histórico. As
+              pontuações do jogador serão preservadas. Esta ação não pode ser
+              desfeita.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel className="font-cyber">Cancel</AlertDialogCancel>
+            <AlertDialogCancel className="font-cyber">
+              Cancelar
+            </AlertDialogCancel>
             <AlertDialogAction
               onClick={handleEndMatch}
               disabled={isEnding}
               className="bg-destructive text-white hover:bg-destructive/80 font-cyber"
             >
-              {isEnding ? "Ending..." : "End Match"}
+              {isEnding ? "Finalizando..." : "Finalizar Partida"}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>

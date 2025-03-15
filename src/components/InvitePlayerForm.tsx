@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { useMatch } from "../contexts/MatchContext";
 import { Button } from "@/components/ui/button";
@@ -20,8 +19,8 @@ const InvitePlayerForm = ({ matchId }: InvitePlayerFormProps) => {
     e.preventDefault();
     if (!email.trim()) {
       toast({
-        title: "Error",
-        description: "Email is required",
+        title: "Erro",
+        description: "E-mail é obrigatório",
         variant: "destructive",
       });
       return;
@@ -29,17 +28,12 @@ const InvitePlayerForm = ({ matchId }: InvitePlayerFormProps) => {
 
     try {
       setIsLoading(true);
-      // In a real app, you would search for the user by email in your database
-      // For this demo, we'll create a mock player with the email as ID and name
-      const mockPlayerId = email;
-      const mockPlayerName = email.split('@')[0];
-      const mockPlayerPhoto = `https://ui-avatars.com/api/?name=${mockPlayerName}&background=8B5CF6&color=fff`;
-      
-      await invitePlayer(matchId, mockPlayerId, mockPlayerName, mockPlayerPhoto);
-      
+
+      await invitePlayer(matchId, email);
+
       toast({
-        title: "Success",
-        description: "Player invited successfully!",
+        title: "Sucesso",
+        description: "Jogador convidado com sucesso!",
       });
       setEmail("");
     } catch (error) {
@@ -56,22 +50,22 @@ const InvitePlayerForm = ({ matchId }: InvitePlayerFormProps) => {
 
   return (
     <form onSubmit={handleSubmit} className="space-y-4 game-card">
-      <h3 className="text-lg font-cyber mb-2 text-white">Invite Player</h3>
+      <h3 className="text-lg font-cyber mb-2 text-white">Convidar Jogador</h3>
       <div className="flex gap-2">
         <Input
           value={email}
           onChange={(e) => setEmail(e.target.value)}
-          placeholder="Enter player email..."
+          placeholder="Digite o e-mail do jogador..."
           className="bg-background/50 border-neon-purple/30 text-white flex-1"
           required
         />
-        <Button 
-          type="submit" 
+        <Button
+          type="submit"
           disabled={isLoading}
           className="game-button flex items-center gap-2"
         >
           <UserPlus size={16} />
-          <span>{isLoading ? "Inviting..." : "Invite"}</span>
+          <span>{isLoading ? "Convidando..." : "Convidar"}</span>
         </Button>
       </div>
     </form>

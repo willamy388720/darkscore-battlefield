@@ -1,8 +1,8 @@
-
-import React, { createContext, useContext, useState } from "react";
-import { useAuth } from "./AuthContext";
-import { addDoc, collection, doc, updateDoc, arrayUnion, deleteDoc, Timestamp } from "firebase/firestore";
-import { db } from "../lib/firebase";
+import React, { createContext, useContext, useEffect, useState } from "react";
+import { useAuth, User } from "./AuthContext";
+import { database } from "../lib/firebase";
+import { get, onValue, ref, remove, set, update } from "firebase/database";
+import { v4 as uuidv4 } from "uuid";
 
 export interface Player {
   id: string;
@@ -15,17 +15,19 @@ export interface Match {
   id: string;
   title: string;
   createdBy: string;
-  createdAt: Timestamp;
+  createdAt: Date | string;
   players: Player[];
   active: boolean;
 }
 
 interface MatchContextType {
+  isLoading: boolean;
   currentMatch: Match | null;
   matches: Match[];
   history: Match[];
   createMatch: (title: string) => Promise<string>;
-  invitePlayer: (matchId: string, playerId: string, playerName: string, playerPhoto: string) => Promise<void>;
+  invitePlayer: (matchId: string, playerEmail: string) => Promise<void>;
+  acceptInvitation: (matchId: string, invitationId: string) => Promise<void>;
   increaseScore: (matchId: string, playerId: string) => Promise<void>;
   resetScores: (matchId: string) => Promise<void>;
   endMatch: (matchId: string) => Promise<void>;
@@ -45,159 +47,223 @@ export const useMatch = () => {
   return context;
 };
 
-export const MatchProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+export const MatchProvider: React.FC<{ children: React.ReactNode }> = ({
+  children,
+}) => {
   const [currentMatch, setCurrentMatch] = useState<Match | null>(null);
   const [matches, setMatches] = useState<Match[]>([]);
   const [history, setHistory] = useState<Match[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+
   const { currentUser } = useAuth();
 
   const createMatch = async (title: string): Promise<string> => {
-    if (!currentUser) throw new Error("User must be logged in to create a match");
-    
+    if (!currentUser)
+      throw new Error("User must be logged in to create a match");
+
     const newMatch = {
       title,
       createdBy: currentUser.uid,
-      createdAt: Timestamp.now(),
-      players: [{
+      createdAt: new Date().toISOString(),
+      players: [
+        {
+          id: currentUser.uid,
+          name: currentUser.displayName || "Unknown",
+          photoURL: currentUser.photoURL || "",
+          score: 0,
+        },
+      ],
+      active: true,
+    };
+
+    const matchId = uuidv4();
+    await set(ref(database, "matches/" + matchId), newMatch);
+
+    // Update local state
+    const matchWithId = { ...newMatch, id: matchId } as Match;
+    setMatches([...matches, matchWithId]);
+    setCurrentMatch(matchWithId);
+
+    return matchId;
+  };
+
+  const invitePlayer = async (matchId: string, playerEmail: string) => {
+    const data = await get(ref(database, "players/"));
+
+    if (!data.exists()) return;
+
+    const players = Object.entries<User>(data.val() ?? {}).map(
+      ([id, value]) => ({
+        uid: id,
+        displayName: value.displayName,
+        email: value.email,
+        photoURL: value.photoURL,
+      })
+    );
+
+    const player = players.find((item) => item.email === playerEmail);
+
+    if (!player) return;
+
+    const invitationMatch = matches.find((item) => item.id === matchId);
+
+    if (!invitationMatch) return;
+
+    await set(
+      ref(
+        database,
+        "invitations_sent/" + player.uid + "/invitations/" + uuidv4()
+      ),
+      {
+        matchId,
+        matchTitle: invitationMatch.title,
+        sentAt: new Date().toISOString(),
+      }
+    );
+  };
+
+  async function removeInvitation(invitationId: string) {
+    if (!currentUser)
+      throw new Error("User must be logged in to create a match");
+
+    await remove(
+      ref(
+        database,
+        "invitations_sent/" + currentUser.uid + "/invitations/" + invitationId
+      )
+    );
+  }
+
+  async function acceptInvitation(matchId: string, invitationId: string) {
+    if (!currentUser)
+      throw new Error("User must be logged in to create a match");
+
+    const alreadyATheMatch = matches.find((item) => item.id === matchId);
+
+    if (alreadyATheMatch) {
+      await removeInvitation(invitationId);
+      return;
+    }
+
+    const matchRef = ref(database, "matches/" + matchId);
+
+    const match = await get(matchRef);
+
+    if (!match.val()) return;
+
+    const dataMatch: Match = {
+      id: matchId,
+      title: match.val().title,
+      createdBy: match.val().createdBy,
+      createdAt: match.val().createdAt,
+      players: match.val().players,
+      active: match.val().active,
+    };
+
+    const updatedPlayers = [
+      ...dataMatch.players,
+      {
         id: currentUser.uid,
         name: currentUser.displayName || "Unknown",
         photoURL: currentUser.photoURL || "",
-        score: 0
-      }],
-      active: true
-    };
-    
-    const docRef = await addDoc(collection(db, "matches"), newMatch);
-    
-    // Update local state
-    const matchWithId = { ...newMatch, id: docRef.id } as Match;
-    setMatches([...matches, matchWithId]);
-    setCurrentMatch(matchWithId);
-    
-    return docRef.id;
-  };
+        score: 0,
+      },
+    ];
 
-  const invitePlayer = async (matchId: string, playerId: string, playerName: string, playerPhoto: string) => {
-    const newPlayer = {
-      id: playerId,
-      name: playerName,
-      photoURL: playerPhoto,
-      score: 0
-    };
-    
-    const matchRef = doc(db, "matches", matchId);
-    await updateDoc(matchRef, {
-      players: arrayUnion(newPlayer)
+    await update(matchRef, {
+      players: updatedPlayers,
     });
-    
-    // Update local state
-    const updatedMatches = matches.map(match => {
-      if (match.id === matchId) {
-        return {
-          ...match,
-          players: [...match.players, newPlayer]
-        };
-      }
-      return match;
-    });
-    
-    setMatches(updatedMatches);
-    
-    if (currentMatch?.id === matchId) {
-      setCurrentMatch({
-        ...currentMatch,
-        players: [...currentMatch.players, newPlayer]
-      });
-    }
-  };
+
+    await removeInvitation(invitationId);
+  }
 
   const increaseScore = async (matchId: string, playerId: string) => {
-    const matchRef = doc(db, "matches", matchId);
-    const match = matches.find(m => m.id === matchId);
-    
+    const matchRef = ref(database, "matches/" + matchId);
+    const match = matches.find((m) => m.id === matchId);
+
     if (!match) return;
-    
-    const updatedPlayers = match.players.map(player => {
+
+    const updatedPlayers = match.players.map((player) => {
       if (player.id === playerId) {
         return { ...player, score: player.score + 1 };
       }
       return player;
     });
-    
-    await updateDoc(matchRef, {
-      players: updatedPlayers
+
+    await update(matchRef, {
+      players: updatedPlayers,
     });
-    
+
     // Update local state
-    const updatedMatches = matches.map(m => {
+    const updatedMatches = matches.map((m) => {
       if (m.id === matchId) {
         return { ...m, players: updatedPlayers };
       }
       return m;
     });
-    
+
     setMatches(updatedMatches);
-    
+
     if (currentMatch?.id === matchId) {
       setCurrentMatch({
         ...currentMatch,
-        players: updatedPlayers
+        players: updatedPlayers,
       });
     }
   };
 
   const resetScores = async (matchId: string) => {
-    const matchRef = doc(db, "matches", matchId);
-    const match = matches.find(m => m.id === matchId);
-    
+    const matchRef = ref(database, "matches/" + matchId);
+    const match = matches.find((m) => m.id === matchId);
+
     if (!match) return;
-    
-    const updatedPlayers = match.players.map(player => ({
+
+    const updatedPlayers = match.players.map((player) => ({
       ...player,
-      score: 0
+      score: 0,
     }));
-    
-    await updateDoc(matchRef, {
-      players: updatedPlayers
+
+    await update(matchRef, {
+      players: updatedPlayers,
     });
-    
+
     // Update local state
-    const updatedMatches = matches.map(m => {
+    const updatedMatches = matches.map((m) => {
       if (m.id === matchId) {
         return { ...m, players: updatedPlayers };
       }
       return m;
     });
-    
+
     setMatches(updatedMatches);
-    
+
     if (currentMatch?.id === matchId) {
       setCurrentMatch({
         ...currentMatch,
-        players: updatedPlayers
+        players: updatedPlayers,
       });
     }
   };
 
   const endMatch = async (matchId: string) => {
-    const matchRef = doc(db, "matches", matchId);
-    
-    await updateDoc(matchRef, {
-      active: false
+    const matchRef = ref(database, "matches/" + matchId);
+
+    await update(matchRef, {
+      active: false,
     });
-    
+
     // Update local state
-    const matchToEnd = matches.find(m => m.id === matchId);
-    
+    const matchToEnd = matches.find((m) => m.id === matchId);
+
     if (matchToEnd) {
       // Move to history
       const endedMatch = { ...matchToEnd, active: false };
       setHistory([endedMatch, ...history]);
-      
+
       // Remove from active matches
-      const updatedMatches = matches.filter(m => m.id !== matchId);
+      const updatedMatches = matches.filter((m) => m.id !== matchId);
       setMatches(updatedMatches);
-      
+
       if (currentMatch?.id === matchId) {
         setCurrentMatch(null);
       }
@@ -205,19 +271,62 @@ export const MatchProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   };
 
   const deleteMatch = async (matchId: string) => {
-    const matchRef = doc(db, "matches", matchId);
-    await deleteDoc(matchRef);
-    
+    const matchRef = ref(database, "matches/" + matchId);
+    await remove(matchRef);
+
     // Update local state
-    const updatedMatches = matches.filter(m => m.id !== matchId);
+    const updatedMatches = matches.filter((m) => m.id !== matchId);
     setMatches(updatedMatches);
-    
+
     if (currentMatch?.id === matchId) {
       setCurrentMatch(null);
     }
   };
 
+  useEffect(() => {
+    if (!currentUser) {
+      setMatches([]);
+      setHistory([]);
+      return;
+    }
+
+    const matchesRef = ref(database, "matches/");
+
+    const unsubscribe = onValue(matchesRef, (snapshot) => {
+      if (snapshot.exists()) {
+        const dataFormatted = Object.entries<Match>(snapshot.val() ?? {}).map(
+          ([id, value]) => ({
+            id,
+            active: value.active,
+            createdAt: value.createdAt,
+            createdBy: value.createdBy,
+            players: value.players,
+            title: value.title,
+          })
+        );
+
+        const matchesWithUser = dataFormatted.filter((match) =>
+          match.players.some((player) => player.id === currentUser.uid)
+        );
+
+        const matchesActives = matchesWithUser.filter((item) => item.active);
+        const matchesDisabled = matchesWithUser.filter((item) => !item.active);
+
+        setHistory(matchesDisabled);
+
+        setMatches(matchesActives);
+      } else {
+        setMatches([]);
+        setHistory([]);
+      }
+      setIsLoading(false);
+    });
+
+    return () => unsubscribe();
+  }, [currentUser]);
+
   const value = {
+    isLoading,
     currentMatch,
     matches,
     history,
@@ -229,8 +338,11 @@ export const MatchProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     deleteMatch,
     setCurrentMatch,
     setMatches,
-    setHistory
+    setHistory,
+    acceptInvitation,
   };
 
-  return <MatchContext.Provider value={value}>{children}</MatchContext.Provider>;
+  return (
+    <MatchContext.Provider value={value}>{children}</MatchContext.Provider>
+  );
 };

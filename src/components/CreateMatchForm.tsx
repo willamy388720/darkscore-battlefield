@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useMatch } from "../contexts/MatchContext";
@@ -18,8 +17,8 @@ const CreateMatchForm = () => {
     e.preventDefault();
     if (!title.trim()) {
       toast({
-        title: "Error",
-        description: "Match title is required",
+        title: "Erro",
+        description: "O título da partida é obrigatório",
         variant: "destructive",
       });
       return;
@@ -29,15 +28,15 @@ const CreateMatchForm = () => {
       setIsLoading(true);
       const matchId = await createMatch(title);
       toast({
-        title: "Success",
-        description: "Match created successfully!",
+        title: "Sucesso",
+        description: "Partida criada com sucesso!",
       });
       navigate(`/match/${matchId}`);
     } catch (error) {
       console.error("Error creating match:", error);
       toast({
-        title: "Error",
-        description: "Failed to create match. Please try again.",
+        title: "Erro",
+        description: "Falha ao criar partida. Tente novamente.",
         variant: "destructive",
       });
     } finally {
@@ -46,23 +45,31 @@ const CreateMatchForm = () => {
   };
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-4 game-card w-full max-w-md mx-auto">
-      <h2 className="text-xl font-cyber mb-4 text-center text-white">Create New Match</h2>
+    <form
+      onSubmit={handleSubmit}
+      className="space-y-4 game-card w-full max-w-md mx-auto"
+    >
+      <h2 className="text-xl font-cyber mb-4 text-center text-white">
+        Criar Nova Partida
+      </h2>
       <div className="space-y-2">
-        <label htmlFor="title" className="block text-sm font-cyber text-muted-foreground">
-          Match Title
+        <label
+          htmlFor="title"
+          className="block text-sm font-cyber text-muted-foreground"
+        >
+          Título da Partida
         </label>
         <Input
           id="title"
           value={title}
           onChange={(e) => setTitle(e.target.value)}
-          placeholder="Enter match title..."
+          placeholder="Insira o título da partida..."
           className="bg-background/50 border-neon-purple/30 text-white"
           required
         />
       </div>
-      <Button 
-        type="submit" 
+      <Button
+        type="submit"
         disabled={isLoading}
         className="game-button w-full flex items-center justify-center gap-2"
       >

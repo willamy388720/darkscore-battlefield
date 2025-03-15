@@ -1,23 +1,23 @@
-
 import { initializeApp } from "firebase/app";
 import { getAuth } from "firebase/auth";
-import { getFirestore } from "firebase/firestore";
+import { getDatabase } from "firebase/database";
 
 // Your web app's Firebase configuration
 // For Firebase JS SDK v7.20.0 and later, measurementId is optional
 const firebaseConfig = {
-  apiKey: "AIzaSyDJDQACEXGIVGYELO4XN90UNaO6tYeN5GM", // This is a placeholder, replace with your actual API key
-  authDomain: "darkscore-battlefield.firebaseapp.com",
-  projectId: "darkscore-battlefield",
-  storageBucket: "darkscore-battlefield.appspot.com",
-  messagingSenderId: "123456789",
-  appId: "1:123456789:web:abc123def456ghi789jkl",
-  measurementId: "G-MEASUREMENT_ID"
+  apiKey: "AIzaSyA591swrkLM_0I-lqpZkMIENp75ZLI8hpM",
+  authDomain: "darkscore-703a5.firebaseapp.com",
+  projectId: "darkscore-703a5",
+  storageBucket: "darkscore-703a5.firebasestorage.app",
+  messagingSenderId: "1045741537291",
+  appId: "1:1045741537291:web:a3a869e9c88a1cc0c3df0e",
+  measurementId: "G-J3803RFG6V",
+  databaseURL: "https://darkscore-703a5-default-rtdb.firebaseio.com",
 };
 
 // Initialize Firebase
 const app = initializeApp(firebaseConfig);
-export const auth = getAuth(app);
-export const db = getFirestore(app);
+const auth = getAuth(app);
+const database = getDatabase(app);
 
-export default app;
+export { database, auth };

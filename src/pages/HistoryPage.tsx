@@ -1,4 +1,3 @@
-
 import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../contexts/AuthContext";
@@ -22,7 +21,7 @@ const HistoryPage = () => {
         <div className="container mx-auto px-4">
           <Navbar />
           <div className="flex items-center justify-center h-64">
-            <p className="text-muted-foreground">Loading...</p>
+            <p className="text-muted-foreground">Carregando...</p>
           </div>
         </div>
       </div>
@@ -37,13 +36,16 @@ const HistoryPage = () => {
     <div className="min-h-screen bg-background">
       <div className="container mx-auto px-4">
         <Navbar />
-        
+
         <div className="game-card">
-          <h2 className="text-2xl font-cyber mb-6 text-white">Match History</h2>
+          <h2 className="text-2xl font-cyber mb-6 text-white">
+            Histórico de Partidas
+          </h2>
           <p className="text-muted-foreground mb-6">
-            View the results of your completed matches. See who won and what the final scores were.
+            Veja os resultados das suas partidas concluídas. Veja quem ganhou e
+            quais foram as pontuações finais.
           </p>
-          
+
           <MatchList isHistory={true} />
         </div>
       </div>

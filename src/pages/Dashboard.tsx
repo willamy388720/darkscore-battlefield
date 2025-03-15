@@ -1,4 +1,3 @@
-
 import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../contexts/AuthContext";
@@ -38,15 +37,17 @@ const Dashboard = () => {
     <div className="min-h-screen bg-background">
       <div className="container mx-auto px-4">
         <Navbar />
-        
+
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
           <div className="md:col-span-1">
             <CreateMatchForm />
           </div>
-          
+
           <div className="md:col-span-2">
             <div className="game-card">
-              <h2 className="text-2xl font-cyber mb-6 text-white">Active Matches</h2>
+              <h2 className="text-2xl font-cyber mb-6 text-white">
+                Partidas ativas
+              </h2>
               <MatchList />
             </div>
           </div>
