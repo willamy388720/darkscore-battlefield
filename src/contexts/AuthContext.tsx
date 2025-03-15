@@ -19,6 +19,8 @@ export interface Invitation {
   id: string;
   matchId: string;
   matchTitle: string;
+  gameTitle: string;
+  invitedBy: User;
   sentAt: Date | string;
 }
 
@@ -114,6 +116,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
             id,
             matchId: value.matchId,
             matchTitle: value.matchTitle,
+            gameTitle: value.gameTitle,
+            invitedBy: value.invitedBy,
             sentAt: value.sentAt,
           })
         );

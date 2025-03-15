@@ -1,8 +1,9 @@
 import { useNavigate } from "react-router-dom";
 import { useMatch, Match } from "../contexts/MatchContext";
 import { Button } from "@/components/ui/button";
-import { CalendarClock, Users, Trophy } from "lucide-react";
+import { CalendarClock, Users, Trophy, Clock } from "lucide-react";
 import { format } from "date-fns";
+import { getGameDuration } from "@/lib/utils";
 
 interface MatchListProps {
   isHistory?: boolean;
@@ -53,7 +54,9 @@ const MatchList = ({ isHistory = false }: MatchListProps) => {
           onClick={() => !isHistory && handleMatchClick(match.id)}
         >
           <div className="flex justify-between items-start mb-3">
-            <h3 className="font-cyber text-white text-lg">{match.title}</h3>
+            <h3 className="font-game neon-text text-white text-lg">
+              {match.title}
+            </h3>
             {isHistory && (
               <div className="bg-neon-purple/30 text-white text-xs px-2 py-1 rounded-full">
                 Concluída
@@ -61,16 +64,33 @@ const MatchList = ({ isHistory = false }: MatchListProps) => {
             )}
           </div>
 
+          <div className="flex justify-between items-start mb-3">
+            <h3 className="font-cyber text-white text-lg">
+              {isHistory ? "Jogaram" : "Jogando"} {match.gameTitle}
+            </h3>
+          </div>
+
           <div className="flex items-center text-sm text-muted-foreground mb-4">
             <CalendarClock size={14} className="mr-1" />
             <span>{format(match.createdAt, "MMM d, yyyy 'às' h:mm a")}</span>
           </div>
 
+          {isHistory && (
+            <div className="flex items-center text-sm text-muted-foreground mb-4">
+              <Clock size={14} className="mr-1" />
+              <span>
+                Duração da partida{" "}
+                {getGameDuration(match.createdAt, match.finishedAt)}
+              </span>
+            </div>
+          )}
+
           <div className="flex justify-between items-center">
             <div className="flex items-center">
               <Users size={16} className="mr-2 text-muted-foreground" />
               <span className="text-muted-foreground">
-                {match.players.length} jogadores
+                {match.players.length}{" "}
+                {match.players.length > 1 ? "jogadores" : "jogador"}
               </span>
             </div>
 

@@ -8,6 +8,7 @@ import { useToast } from "@/components/ui/use-toast";
 
 const CreateMatchForm = () => {
   const [title, setTitle] = useState("");
+  const [game, setGame] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const { createMatch } = useMatch();
   const navigate = useNavigate();
@@ -24,9 +25,18 @@ const CreateMatchForm = () => {
       return;
     }
 
+    if (!game.trim()) {
+      toast({
+        title: "Erro",
+        description: "O game da vez é obrigatório",
+        variant: "destructive",
+      });
+      return;
+    }
+
     try {
       setIsLoading(true);
-      const matchId = await createMatch(title);
+      const matchId = await createMatch(title, game);
       toast({
         title: "Sucesso",
         description: "Partida criada com sucesso!",
@@ -64,6 +74,23 @@ const CreateMatchForm = () => {
           value={title}
           onChange={(e) => setTitle(e.target.value)}
           placeholder="Insira o título da partida..."
+          className="bg-background/50 border-neon-purple/30 text-white"
+          required
+        />
+      </div>
+
+      <div className="space-y-2">
+        <label
+          htmlFor="title"
+          className="block text-sm font-cyber text-muted-foreground"
+        >
+          Game da Vez
+        </label>
+        <Input
+          id="title"
+          value={game}
+          onChange={(e) => setGame(e.target.value)}
+          placeholder="Insira o game que vocês vão jogar..."
           className="bg-background/50 border-neon-purple/30 text-white"
           required
         />

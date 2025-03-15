@@ -16,8 +16,10 @@ export interface Match {
   title: string;
   createdBy: string;
   createdAt: Date | string;
+  finishedAt: Date | string;
   players: Player[];
   active: boolean;
+  gameTitle: string;
 }
 
 interface MatchContextType {
@@ -25,7 +27,7 @@ interface MatchContextType {
   currentMatch: Match | null;
   matches: Match[];
   history: Match[];
-  createMatch: (title: string) => Promise<string>;
+  createMatch: (title: string, gameTitle: string) => Promise<string>;
   invitePlayer: (matchId: string, playerEmail: string) => Promise<void>;
   acceptInvitation: (matchId: string, invitationId: string) => Promise<void>;
   increaseScore: (matchId: string, playerId: string) => Promise<void>;
@@ -57,7 +59,10 @@ export const MatchProvider: React.FC<{ children: React.ReactNode }> = ({
 
   const { currentUser } = useAuth();
 
-  const createMatch = async (title: string): Promise<string> => {
+  const createMatch = async (
+    title: string,
+    gameTitle: string
+  ): Promise<string> => {
     if (!currentUser)
       throw new Error("User must be logged in to create a match");
 
@@ -65,6 +70,8 @@ export const MatchProvider: React.FC<{ children: React.ReactNode }> = ({
       title,
       createdBy: currentUser.uid,
       createdAt: new Date().toISOString(),
+      finishedAt: "",
+      gameTitle,
       players: [
         {
           id: currentUser.uid,
@@ -88,6 +95,8 @@ export const MatchProvider: React.FC<{ children: React.ReactNode }> = ({
   };
 
   const invitePlayer = async (matchId: string, playerEmail: string) => {
+    if (!currentUser) return;
+
     const data = await get(ref(database, "players/"));
 
     if (!data.exists()) return;
@@ -117,6 +126,8 @@ export const MatchProvider: React.FC<{ children: React.ReactNode }> = ({
       {
         matchId,
         matchTitle: invitationMatch.title,
+        invitedBy: currentUser,
+        gameTitle: invitationMatch.gameTitle,
         sentAt: new Date().toISOString(),
       }
     );
@@ -156,8 +167,10 @@ export const MatchProvider: React.FC<{ children: React.ReactNode }> = ({
       title: match.val().title,
       createdBy: match.val().createdBy,
       createdAt: match.val().createdAt,
+      finishedAt: match.val().finishedAt,
       players: match.val().players,
       active: match.val().active,
+      gameTitle: match.val().gameTitle,
     };
 
     const updatedPlayers = [
@@ -248,8 +261,11 @@ export const MatchProvider: React.FC<{ children: React.ReactNode }> = ({
   const endMatch = async (matchId: string) => {
     const matchRef = ref(database, "matches/" + matchId);
 
+    const finishedAt = new Date().toISOString();
+
     await update(matchRef, {
       active: false,
+      finishedAt,
     });
 
     // Update local state
@@ -257,7 +273,7 @@ export const MatchProvider: React.FC<{ children: React.ReactNode }> = ({
 
     if (matchToEnd) {
       // Move to history
-      const endedMatch = { ...matchToEnd, active: false };
+      const endedMatch = { ...matchToEnd, active: false, finishedAt };
       setHistory([endedMatch, ...history]);
 
       // Remove from active matches
@@ -302,6 +318,8 @@ export const MatchProvider: React.FC<{ children: React.ReactNode }> = ({
             createdBy: value.createdBy,
             players: value.players,
             title: value.title,
+            finishedAt: value.finishedAt,
+            gameTitle: value.gameTitle,
           })
         );
 

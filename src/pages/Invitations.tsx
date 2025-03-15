@@ -81,10 +81,22 @@ const Invitations = () => {
                   className={"game-card flex items-center justify-between"}
                 >
                   <div>
-                    <div className="flex justify-between items-start mb-3">
-                      <h3 className="font-cyber text-white text-lg">
-                        {invitation.matchTitle}
+                    <div className="flex flex-col justify-between items-start mb-3">
+                      <h3 className="font-game neon-text text-white text-lg mb-3">
+                        Um convite para partida {invitation.matchTitle}
                       </h3>
+
+                      <div className="flex items-center">
+                        <img
+                          src={invitation.invitedBy.photoURL || ""}
+                          alt={invitation.invitedBy.displayName || "User"}
+                          className="w-8 h-8 rounded-full mr-2 border border-neon-purple/50"
+                        />
+                        <span className="text-lg font-cyber">
+                          {invitation.invitedBy.displayName} convidou você para
+                          jogar {invitation.gameTitle}
+                        </span>
+                      </div>
                     </div>
 
                     <div className="flex items-center text-sm text-muted-foreground">
@@ -102,7 +114,7 @@ const Invitations = () => {
                     }}
                     className="game-button text-sm"
                   >
-                    Aceitar convite
+                    Juntar-se a partida
                   </Button>
                 </div>
               ))}
