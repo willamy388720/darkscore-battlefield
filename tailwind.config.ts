@@ -1,3 +1,4 @@
+
 import type { Config } from "tailwindcss";
 
 export default {
@@ -61,7 +62,15 @@ export default {
 					'accent-foreground': 'hsl(var(--sidebar-accent-foreground))',
 					border: 'hsl(var(--sidebar-border))',
 					ring: 'hsl(var(--sidebar-ring))'
-				}
+				},
+                // Gaming themed colors
+                neon: {
+                    purple: '#8B5CF6',
+                    blue: '#3B82F6',
+                    cyan: '#06B6D4',
+                    pink: '#EC4899',
+                    green: '#10B981',
+                }
 			},
 			borderRadius: {
 				lg: 'var(--radius)',
@@ -84,12 +93,34 @@ export default {
 					to: {
 						height: '0'
 					}
-				}
+				},
+                'pulse-neon': {
+                    '0%, 100%': { 
+                        boxShadow: '0 0 8px 2px rgba(139, 92, 246, 0.3), 0 0 12px 4px rgba(139, 92, 246, 0.2)' 
+                    },
+                    '50%': { 
+                        boxShadow: '0 0 16px 4px rgba(139, 92, 246, 0.4), 0 0 24px 8px rgba(139, 92, 246, 0.3)' 
+                    }
+                },
+                'glow': {
+                    '0%, 100%': { 
+                        textShadow: '0 0 4px rgba(139, 92, 246, 0.5), 0 0 8px rgba(139, 92, 246, 0.3)' 
+                    },
+                    '50%': { 
+                        textShadow: '0 0 8px rgba(139, 92, 246, 0.7), 0 0 16px rgba(139, 92, 246, 0.5)' 
+                    }
+                }
 			},
 			animation: {
 				'accordion-down': 'accordion-down 0.2s ease-out',
-				'accordion-up': 'accordion-up 0.2s ease-out'
-			}
+				'accordion-up': 'accordion-up 0.2s ease-out',
+                'pulse-neon': 'pulse-neon 3s infinite ease-in-out',
+                'glow': 'glow 2s infinite ease-in-out'
+			},
+            fontFamily: {
+                'game': ['"Press Start 2P"', 'cursive'],
+                'cyber': ['"Orbitron"', 'sans-serif']
+            }
 		}
 	},
 	plugins: [require("tailwindcss-animate")],
