@@ -1,12 +1,13 @@
-import { useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from "../contexts/AuthContext";
 import LoginButton from "./LoginButton";
 import { Button } from "@/components/ui/button";
-import { GamepadIcon, HistoryIcon, HomeIcon, MailIcon } from "lucide-react";
+import { GamepadIcon, HistoryIcon, HomeIcon, MailIcon, UsersIcon } from "lucide-react";
 
 const Navbar = () => {
   const { currentUser, invitations } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
 
   return (
     <nav className="flex justify-between items-center py-4 mb-8">
@@ -14,21 +15,21 @@ const Navbar = () => {
         <h1 className="text-2xl font-game neon-text mr-8">DARKSCORE</h1>
 
         <div className="flex space-x-4">
-          <Button
+          {!currentUser && <Button
             variant="ghost"
             onClick={() => navigate("/")}
-            className="flex items-center gap-2 font-cyber text-muted-foreground hover:text-white"
+            className={`flex items-center gap-2 font-cyber ${location.pathname === "/" ? "text-white" : "text-muted-foreground hover:text-white"}`}
           >
             <HomeIcon size={16} />
             <span>Home</span>
-          </Button>
+          </Button>}
 
           {currentUser && (
             <>
               <Button
                 variant="ghost"
                 onClick={() => navigate("/dashboard")}
-                className="flex items-center gap-2 font-cyber text-muted-foreground hover:text-white"
+                className={`flex items-center gap-2 font-cyber ${location.pathname.includes("dashboard") || location.pathname.includes("match") ? "text-white" : "text-muted-foreground hover:text-white"}`}
               >
                 <GamepadIcon size={16} />
                 <span>Partidas</span>
@@ -37,7 +38,7 @@ const Navbar = () => {
               <Button
                 variant="ghost"
                 onClick={() => navigate("/history")}
-                className="flex items-center gap-2 font-cyber text-muted-foreground hover:text-white"
+                className={`flex items-center gap-2 font-cyber ${location.pathname.includes("history") ? "text-white" : "text-muted-foreground hover:text-white"}`}
               >
                 <HistoryIcon size={16} />
                 <span>Histórico</span>
@@ -45,8 +46,17 @@ const Navbar = () => {
 
               <Button
                 variant="ghost"
+                onClick={() => navigate("/friends")}
+                className={`flex items-center gap-2 font-cyber ${location.pathname.includes("friends") ? "text-white" : "text-muted-foreground hover:text-white"}`}
+              >
+                <UsersIcon size={16} />
+                <span>Amigos</span>
+              </Button>
+
+              <Button
+                variant="ghost"
                 onClick={() => navigate("/invitations")}
-                className="flex items-center gap-2 font-cyber text-muted-foreground hover:text-white"
+                className={`flex items-center gap-2 font-cyber ${location.pathname.includes("invitations") ? "text-white" : "text-muted-foreground hover:text-white"}`}
               >
                 {invitations.length > 0 && (
                   <span className="flex rounded-full bg-red-500 text-white w-6 h-6 items-center justify-center">

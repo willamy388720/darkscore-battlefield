@@ -1,6 +1,6 @@
 import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { useAuth } from "../contexts/AuthContext";
+import { Friend, useAuth } from "../contexts/AuthContext";
 import Navbar from "../components/Navbar";
 import { Button } from "@/components/ui/button";
 import { CalendarClock } from "lucide-react";
@@ -9,16 +9,33 @@ import { useMatch } from "@/contexts/MatchContext";
 import { useToast } from "@/hooks/use-toast";
 
 const Invitations = () => {
-  const { currentUser, loading, invitations } = useAuth();
+  const { currentUser, loading, invitations, acceptFriendshipInvitation } = useAuth();
   const { acceptInvitation } = useMatch();
   const { toast } = useToast();
 
   const navigate = useNavigate();
 
+  const friendshipInvitations = invitations.filter(invitation => invitation.type === "Friend")
+
+  const matchInvitations = invitations.filter(invitation => invitation.type === "Match")
+
   async function handleAcceptInvitation(matchId: string, invitationId: string) {
     try {
       await acceptInvitation(matchId, invitationId);
       navigate(`/match/${matchId}`);
+    } catch (error) {
+      console.log(error);
+      toast({
+        title: "Erro",
+        description: "Falha ao aceitar convite. Tente novamente.",
+        variant: "destructive",
+      });
+    }
+  }
+
+  async function handleAcceptFriendshipInvitation(invitedBy: Friend, invitationId: string) {
+    try {
+      await acceptFriendshipInvitation(invitedBy, invitationId);
     } catch (error) {
       console.log(error);
       toast({
@@ -38,7 +55,7 @@ const Invitations = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-background">
+      <div className="min-h-screen">
         <div className="container mx-auto px-4">
           <Navbar />
           <div className="flex items-center justify-center h-64">
@@ -54,7 +71,7 @@ const Invitations = () => {
   }
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen">
       <div className="container mx-auto px-4">
         <Navbar />
 
@@ -73,8 +90,11 @@ const Invitations = () => {
             </div>
           )}
 
-          {invitations.length > 0 && (
+          {matchInvitations.length > 0 && (
             <div className="space-y-4">
+              <h3 className="font-cyber text-white text-lg mb-3">
+                Convites para partida
+              </h3>
               {invitations.map((invitation) => (
                 <div
                   key={invitation.id}
@@ -115,6 +135,52 @@ const Invitations = () => {
                     className="game-button text-sm"
                   >
                     Juntar-se a partida
+                  </Button>
+                </div>
+              ))}
+            </div>
+          )}
+
+          {friendshipInvitations.length > 0 && (
+            <div className="space-y-4">
+              <h3 className="font-cyber text-white text-lg mb-3">
+                Convites de amizade
+              </h3>
+              {friendshipInvitations.map((invitation) => (
+                <div
+                  key={invitation.id}
+                  className={"game-card flex items-center justify-between"}
+                >
+                  <div>
+                    <div className="flex flex-col justify-between items-start mb-3">
+                      <div className="flex items-center">
+                        <img
+                          src={invitation.invitedBy.photoURL || ""}
+                          alt={invitation.invitedBy.displayName || "User"}
+                          className="w-8 h-8 rounded-full mr-2 border border-neon-purple/50"
+                        />
+                        <span className="text-lg font-cyber">
+                          {invitation.invitedBy.displayName} quer ser seu amigo! Aceite o convite e comece a jogar junto.
+                        </span>
+                      </div>
+                    </div>
+
+                    <div className="flex items-center text-sm text-muted-foreground">
+                      <CalendarClock size={14} className="mr-1" />
+                      <span>
+                        {format(invitation.sentAt, "MMM d, yyyy 'às' h:mm a")}
+                      </span>
+                    </div>
+                  </div>
+
+                  <Button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleAcceptFriendshipInvitation(invitation.invitedBy, invitation.id);
+                    }}
+                    className="game-button text-sm"
+                  >
+                    Aceitar convite
                   </Button>
                 </div>
               ))}

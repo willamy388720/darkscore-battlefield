@@ -29,8 +29,10 @@ interface MatchContextType {
   history: Match[];
   createMatch: (title: string, gameTitle: string) => Promise<string>;
   invitePlayer: (matchId: string, playerEmail: string) => Promise<void>;
+  removePlayer: (matchId: string, playerId: string) => Promise<void>;
   acceptInvitation: (matchId: string, invitationId: string) => Promise<void>;
   increaseScore: (matchId: string, playerId: string) => Promise<void>;
+  decreaseScore: (matchId: string, playerId: string) => Promise<void>;
   resetScores: (matchId: string) => Promise<void>;
   endMatch: (matchId: string) => Promise<void>;
   deleteMatch: (matchId: string) => Promise<void>;
@@ -129,8 +131,32 @@ export const MatchProvider: React.FC<{ children: React.ReactNode }> = ({
         invitedBy: currentUser,
         gameTitle: invitationMatch.gameTitle,
         sentAt: new Date().toISOString(),
+        type: "Match"
       }
     );
+  };
+
+  const removePlayer = async (matchId: string, playerId: string) => {
+    if (!currentUser) return;
+
+    const invitationMatch = matches.find((item) => item.id === matchId);
+
+    if (!invitationMatch) return;
+
+    const updatedMatch: Match = {
+      ...invitationMatch,
+      players: invitationMatch.players.filter(item => item.id !== playerId)
+    }
+
+    await update(
+      ref(
+        database,
+        "matches/" + matchId
+      ),
+      updatedMatch
+    );
+
+    setCurrentMatch(updatedMatch)
   };
 
   async function removeInvitation(invitationId: string) {
@@ -200,6 +226,44 @@ export const MatchProvider: React.FC<{ children: React.ReactNode }> = ({
       if (player.id === playerId) {
         return { ...player, score: player.score + 1 };
       }
+      return player;
+    });
+
+    await update(matchRef, {
+      players: updatedPlayers,
+    });
+
+    // Update local state
+    const updatedMatches = matches.map((m) => {
+      if (m.id === matchId) {
+        return { ...m, players: updatedPlayers };
+      }
+      return m;
+    });
+
+    setMatches(updatedMatches);
+
+    if (currentMatch?.id === matchId) {
+      setCurrentMatch({
+        ...currentMatch,
+        players: updatedPlayers,
+      });
+    }
+  };
+
+  const decreaseScore = async (matchId: string, playerId: string) => {
+    const matchRef = ref(database, "matches/" + matchId);
+    const match = matches.find((m) => m.id === matchId);
+
+    if (!match) return;
+
+    const updatedPlayers = match.players.map((player) => {
+      if (player.id === playerId) {
+        if(player.score === 0) return player
+
+        return { ...player, score: player.score - 1 };
+      }
+    
       return player;
     });
 
@@ -350,7 +414,9 @@ export const MatchProvider: React.FC<{ children: React.ReactNode }> = ({
     history,
     createMatch,
     invitePlayer,
+    removePlayer,
     increaseScore,
+    decreaseScore,
     resetScores,
     endMatch,
     deleteMatch,

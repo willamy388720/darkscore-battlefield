@@ -18,7 +18,7 @@ const Dashboard = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-background">
+      <div className="min-h-screen">
         <div className="container mx-auto px-4">
           <Navbar />
           <div className="flex items-center justify-center h-64">
@@ -34,7 +34,7 @@ const Dashboard = () => {
   }
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen">
       <div className="container mx-auto px-4">
         <Navbar />
 

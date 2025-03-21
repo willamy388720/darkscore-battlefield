@@ -1,30 +1,50 @@
 import { useMatch, Player } from "../contexts/MatchContext";
-import { Plus } from "lucide-react";
+import { Minus, Plus, XIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "../contexts/AuthContext";
 
 interface PlayerCardProps {
   player: Player;
   matchId: string;
+  currentPlayerIsTheCreator: boolean; 
 }
 
-const PlayerCard = ({ player, matchId }: PlayerCardProps) => {
-  const { increaseScore } = useMatch();
+const PlayerCard = ({ player, matchId, currentPlayerIsTheCreator }: PlayerCardProps) => {
+  const { increaseScore, removePlayer, decreaseScore } = useMatch();
   const { currentUser } = useAuth();
 
   const handleIncreaseScore = () => {
     increaseScore(matchId, player.id);
   };
 
+  const handleDecraseScore = () => {
+    decreaseScore(matchId, player.id);
+  };
+
+
+  const handleRemovePlayer = () => {
+    removePlayer(matchId, player.id);
+  };
+
   // Check if the current user is the owner of this player card
   const isCurrentUser = currentUser?.uid === player.id;
 
   return (
-    <div className="game-card relative">
+    <div className="game-card relative justify-center">
       {isCurrentUser && (
         <div className="absolute top-2 right-2 bg-neon-purple/30 text-white text-xs px-2 py-1 rounded-full">
           Você
         </div>
+      )}
+
+      {!isCurrentUser && currentPlayerIsTheCreator && (
+        <Button
+        onClick={handleRemovePlayer}
+        variant="ghost"
+        className="absolute top-2 right-2 text-muted-foreground hover:text-white"
+        >
+          <XIcon size={20} />
+        </Button>
       )}
 
       <div className="flex items-center mb-4">
@@ -46,13 +66,25 @@ const PlayerCard = ({ player, matchId }: PlayerCardProps) => {
           </div>
         </div>
 
-        <Button
-          onClick={handleIncreaseScore}
-          className="score-button"
-          aria-label="Increase score"
-        >
-          <Plus size={20} />
-        </Button>
+        {(isCurrentUser || currentPlayerIsTheCreator) &&  
+        <div className="flex gap-2">
+          <Button
+            onClick={handleDecraseScore}
+            className="bg-destructive/100 hover:bg-destructive/90"
+            aria-label="Increase score"
+          >
+            <Minus size={20} />
+          </Button>
+
+          <Button
+            onClick={handleIncreaseScore}
+            className="score-button"
+            aria-label="Increase score"
+          >
+            <Plus size={20} />
+          </Button>
+        </div>
+        }
       </div>
     </div>
   );

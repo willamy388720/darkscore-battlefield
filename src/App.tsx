@@ -11,6 +11,7 @@ import MatchDetails from "./pages/MatchDetails";
 import HistoryPage from "./pages/HistoryPage";
 import NotFound from "./pages/NotFound";
 import Invitations from "./pages/Invitations";
+import Friends from "./pages/Friends";
 
 const queryClient = new QueryClient();
 
@@ -27,6 +28,7 @@ const App = () => (
               <Route path="/dashboard" element={<Dashboard />} />
               <Route path="/match/:id" element={<MatchDetails />} />
               <Route path="/history" element={<HistoryPage />} />
+              <Route path="/friends" element={<Friends />} />
               <Route path="/invitations" element={<Invitations />} />
               <Route path="*" element={<NotFound />} />
             </Routes>
