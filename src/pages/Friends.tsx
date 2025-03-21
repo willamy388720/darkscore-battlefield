@@ -15,14 +15,13 @@ import { database } from "@/lib/firebase";
 const Friends = () => {
   const [email, setEmail] = useState("");
   const [isLoading, setIsLoading] = useState(false);
-  const [allMatches, setAllMatches] = useState<Match[]>([]);
   const [allInvitations, setallInvitations] = useState<Invitation[]>([]);
   const [isInvitationConfrontation, setInvitationConfrontation] = useState(false)
   const [currentFriend, setCurrentFriend] = useState<Friend | null>(null)
 
 
-  const { currentUser, loading, friends, inviteFriend } = useAuth();
-  const { matches, invitePlayer } = useMatch();
+  const { currentUser, loading, friends, inviteFriend, removeFriend } = useAuth();
+  const { matches, invitePlayer, history } = useMatch();
   const { toast } = useToast();
 
   const navigate = useNavigate();
@@ -34,11 +33,10 @@ const Friends = () => {
     let myVictories = 0
     let friendVictories = 0
 
-    confrontations = allMatches.filter(match => 
-      !match.active && match.players.some(player => player.id === currentUser.uid) && match.players.some(player => player.id === friend.uid)
+    confrontations = history.filter(match => 
+      match.players.some(player => player.id === currentUser.uid) && match.players.some(player => player.id === friend.uid)
     )
 
-    
     confrontations.forEach(confrontation => {
       let topScore = {id: "", score: -Infinity}
 
@@ -128,6 +126,28 @@ const Friends = () => {
     }
   }
 
+  async function handleRemoveFriend(friendId: string) {
+    try {
+      setIsLoading(true);
+
+      await removeFriend(friendId);
+
+      toast({
+        title: "Sucesso",
+        description: "Amigo removido sucesso!",
+      });
+    } catch (error) {
+      console.log(error);
+      toast({
+        title: "Error",
+        description: "Falha ao remover. Tente novamente.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  }
+
   function alreadyBeenInvited(matchId: string) {
     const matchesFilteredByInvitation = matchesWithoutTheFriend.filter(match => allInvitations.some(invitation => invitation.matchId === match.id));
 
@@ -151,41 +171,6 @@ const Friends = () => {
       </Button>
     )
   }
-
-  useEffect(() => {
-      if (!currentUser) {
-        setAllMatches([]);
-        return;
-      }
-  
-      const matchesRef = ref(database, "matches/");
-  
-      const unsubscribeMatches = onValue(matchesRef, (snapshot) => {
-        if (snapshot.exists()) {
-          const dataFormatted = Object.entries<Match>(snapshot.val() ?? {}).map(
-            ([id, value]) => ({
-              id,
-              active: value.active,
-              createdAt: value.createdAt,
-              createdBy: value.createdBy,
-              players: value.players,
-              title: value.title,
-              finishedAt: value.finishedAt,
-              gameTitle: value.gameTitle,
-            })
-          );
-  
-          setAllMatches(dataFormatted);
-        } else {
-          setAllMatches([]);
-        }
-      });
-
-      return () => {
-        unsubscribeMatches();
-      }
-      
-  }, [currentUser]);
 
   useEffect(() => {
     if (!currentUser || !currentFriend) {
@@ -377,6 +362,7 @@ const Friends = () => {
                           <Button
                             onClick={(e) => {
                               e.stopPropagation();
+                              handleRemoveFriend(friend.uid)
                             }}
                             className=" text-sm bg-destructive/100 hover:bg-destructive/90"
                             >

@@ -1,10 +1,14 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useMatch } from "../contexts/MatchContext";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { UserPlus, Users } from "lucide-react";
 import { useToast } from "@/components/ui/use-toast";
-import { Dialog, DialogClose, DialogContent, DialogDescription, DialogOverlay, DialogPortal, DialogTitle, DialogTrigger } from "./ui/dialog";
+import { Dialog, DialogContent, DialogOverlay, DialogPortal, DialogTitle, DialogTrigger } from "./ui/dialog";
+import { Friend, Invitation, useAuth } from "@/contexts/AuthContext";
+import { get, onValue, ref } from "firebase/database";
+import { database } from "@/lib/firebase";
+import { PlayerWithInvitations } from "@/dtos/playerWithInvitationsDTO";
 
 interface InvitePlayerFormProps {
   matchId: string;
@@ -13,8 +17,11 @@ interface InvitePlayerFormProps {
 const InvitePlayerForm = ({ matchId }: InvitePlayerFormProps) => {
   const [email, setEmail] = useState("");
   const [isLoading, setIsLoading] = useState(false);
-  const { invitePlayer } = useMatch();
+  const [players, setPlayers] = useState<PlayerWithInvitations[]>([])
+
+  const { invitePlayer, currentMatch } = useMatch();
   const { toast } = useToast();
+  const {friends} = useAuth()
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -49,6 +56,66 @@ const InvitePlayerForm = ({ matchId }: InvitePlayerFormProps) => {
     }
   };
 
+  const handleInviteMatch = async (friend: Friend) => {
+    try {
+      setIsLoading(true);
+
+      await invitePlayer(matchId, friend.email);
+
+      const playerIndex = players.findIndex(player => player.uid === friend.uid)
+
+      if (playerIndex > -1) {
+        const clonePlayers = [...players]
+
+        clonePlayers[playerIndex].invitation = true
+
+        setPlayers([...clonePlayers])
+      }
+
+      toast({
+        title: "Sucesso",
+        description: "Jogador convidado com sucesso!",
+      });
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Falha ao convidar jogador. Tente novamente.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  useEffect(() => { 
+    const friendsFiltered = friends.filter(friend => 
+      !currentMatch.players.some(player => player.id === friend.uid)
+    );
+  
+    const fetchInvitations = async () => {
+      const updatedPlayers: PlayerWithInvitations[] = [];
+  
+      for (const friend of friendsFiltered) {
+        const invitationsRef = ref(
+          database,
+          `invitations_sent/${friend.uid}/invitations/`
+        );
+  
+        const dataInvitations = await get(invitationsRef);
+  
+        const invitationExists = dataInvitations.exists()
+          ? Object.values<Invitation>(dataInvitations.val()).some(inv => inv.matchId === matchId)
+          : false;
+  
+        updatedPlayers.push({ ...friend, invitation: invitationExists });
+      }
+  
+      setPlayers(updatedPlayers); 
+    };
+  
+    fetchInvitations();
+  }, [currentMatch, friends]);
+
   return (
     <Dialog>
       <form onSubmit={handleSubmit} className="flex flex-col space-y-4 game-card">
@@ -69,9 +136,44 @@ const InvitePlayerForm = ({ matchId }: InvitePlayerFormProps) => {
           <DialogPortal>
             <DialogOverlay />
             <DialogContent>
-              <DialogTitle />
-              <DialogDescription />
-              <DialogClose />
+              <DialogTitle>Convidar Amigos</DialogTitle>
+
+              <div className="mt-3">
+                {players.length === 0 && 
+                  <h2 className="text-lg font-cyber text-muted-foreground">
+                    Todos seus amigos já estão na partida.
+                  </h2>
+                }
+
+                {players.map(friend => (
+                  <div key={friend.uid} className="flex items-center justify-between">
+                    <div className="flex items-center flex-1">
+                      <img
+                        src={friend.photoURL || "/placeholder.svg"}
+                        alt={friend.displayName}
+                        className="w-6 h-6 rounded-full mr-2 border border-neon-purple/30"
+                      />
+                      <span className="text-white">{friend.displayName}</span>
+                    </div>
+
+                    {friend.invitation ?  
+                      (
+                        <div className="bg-neon-purple/30 text-white text-xs px-2 py-1 rounded-full">
+                          Convidado
+                        </div>
+                      ) : 
+                      (
+                        <Button
+                          onClick={() => handleInviteMatch(friend)}
+                          className="game-button flex items-center gap-2"
+                        >
+                          <span>{isLoading ? "Convidando..." : "Convidar"}</span>
+                        </Button>
+                      )
+                    }
+                  </div>
+                ))}
+              </div>
             </DialogContent>
           </DialogPortal>
         

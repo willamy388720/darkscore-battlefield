@@ -1,50 +1,18 @@
 import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { Friend, useAuth } from "../contexts/AuthContext";
+import { useAuth } from "../contexts/AuthContext";
 import Navbar from "../components/Navbar";
-import { Button } from "@/components/ui/button";
-import { CalendarClock } from "lucide-react";
-import { format } from "date-fns";
-import { useMatch } from "@/contexts/MatchContext";
-import { useToast } from "@/hooks/use-toast";
+import MatchInvitation from "@/components/MatchInvitation";
+import FriendshipInvitation from "@/components/FriendshipInvitation";
 
 const Invitations = () => {
-  const { currentUser, loading, invitations, acceptFriendshipInvitation } = useAuth();
-  const { acceptInvitation } = useMatch();
-  const { toast } = useToast();
+  const { currentUser, loading, invitations } = useAuth();
 
   const navigate = useNavigate();
 
   const friendshipInvitations = invitations.filter(invitation => invitation.type === "Friend")
 
   const matchInvitations = invitations.filter(invitation => invitation.type === "Match")
-
-  async function handleAcceptInvitation(matchId: string, invitationId: string) {
-    try {
-      await acceptInvitation(matchId, invitationId);
-      navigate(`/match/${matchId}`);
-    } catch (error) {
-      console.log(error);
-      toast({
-        title: "Erro",
-        description: "Falha ao aceitar convite. Tente novamente.",
-        variant: "destructive",
-      });
-    }
-  }
-
-  async function handleAcceptFriendshipInvitation(invitedBy: Friend, invitationId: string) {
-    try {
-      await acceptFriendshipInvitation(invitedBy, invitationId);
-    } catch (error) {
-      console.log(error);
-      toast({
-        title: "Erro",
-        description: "Falha ao aceitar convite. Tente novamente.",
-        variant: "destructive",
-      });
-    }
-  }
 
   // Redirect to home if not logged in
   useEffect(() => {
@@ -96,47 +64,7 @@ const Invitations = () => {
                 Convites para partida
               </h3>
               {invitations.map((invitation) => (
-                <div
-                  key={invitation.id}
-                  className={"game-card flex items-center justify-between"}
-                >
-                  <div>
-                    <div className="flex flex-col justify-between items-start mb-3">
-                      <h3 className="font-game neon-text text-white text-lg mb-3">
-                        Um convite para partida {invitation.matchTitle}
-                      </h3>
-
-                      <div className="flex items-center">
-                        <img
-                          src={invitation.invitedBy.photoURL || ""}
-                          alt={invitation.invitedBy.displayName || "User"}
-                          className="w-8 h-8 rounded-full mr-2 border border-neon-purple/50"
-                        />
-                        <span className="text-lg font-cyber">
-                          {invitation.invitedBy.displayName} convidou você para
-                          jogar {invitation.gameTitle}
-                        </span>
-                      </div>
-                    </div>
-
-                    <div className="flex items-center text-sm text-muted-foreground">
-                      <CalendarClock size={14} className="mr-1" />
-                      <span>
-                        {format(invitation.sentAt, "MMM d, yyyy 'às' h:mm a")}
-                      </span>
-                    </div>
-                  </div>
-
-                  <Button
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      handleAcceptInvitation(invitation.matchId, invitation.id);
-                    }}
-                    className="game-button text-sm"
-                  >
-                    Juntar-se a partida
-                  </Button>
-                </div>
+                <MatchInvitation invitation={invitation} />
               ))}
             </div>
           )}
@@ -147,42 +75,7 @@ const Invitations = () => {
                 Convites de amizade
               </h3>
               {friendshipInvitations.map((invitation) => (
-                <div
-                  key={invitation.id}
-                  className={"game-card flex items-center justify-between"}
-                >
-                  <div>
-                    <div className="flex flex-col justify-between items-start mb-3">
-                      <div className="flex items-center">
-                        <img
-                          src={invitation.invitedBy.photoURL || ""}
-                          alt={invitation.invitedBy.displayName || "User"}
-                          className="w-8 h-8 rounded-full mr-2 border border-neon-purple/50"
-                        />
-                        <span className="text-lg font-cyber">
-                          {invitation.invitedBy.displayName} quer ser seu amigo! Aceite o convite e comece a jogar junto.
-                        </span>
-                      </div>
-                    </div>
-
-                    <div className="flex items-center text-sm text-muted-foreground">
-                      <CalendarClock size={14} className="mr-1" />
-                      <span>
-                        {format(invitation.sentAt, "MMM d, yyyy 'às' h:mm a")}
-                      </span>
-                    </div>
-                  </div>
-
-                  <Button
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      handleAcceptFriendshipInvitation(invitation.invitedBy, invitation.id);
-                    }}
-                    className="game-button text-sm"
-                  >
-                    Aceitar convite
-                  </Button>
-                </div>
+                <FriendshipInvitation invitation={invitation}/>
               ))}
             </div>
           )}

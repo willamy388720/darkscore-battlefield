@@ -23,7 +23,7 @@ export interface Invitation {
   matchTitle?: string;
   gameTitle?: string;
   type: "Friend" | "Match";
-  invitedBy: User;
+  invitedBy: Friend;
   sentAt: Date | string;
 }
 
@@ -38,6 +38,7 @@ interface AuthContextType {
   logout: () => Promise<void>;
   inviteFriend: (playerEmail: string) => Promise<void>
   acceptFriendshipInvitation: (invitedBy: Friend, invitationId: string) => Promise<void>
+  removeFriend: (friendId: string) => Promise<void>
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -154,55 +155,95 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
   };
 
   async function removeInvitation(invitationId: string) {
-      if (!currentUser)
-        throw new Error("User must be logged in to create a match");
-  
-      await remove(
-        ref(
-          database,
-          "invitations_sent/" + currentUser.uid + "/invitations/" + invitationId
-        )
-      );
-    }
-  
-    async function acceptFriendshipInvitation(invitedBy: Friend, invitationId: string) {
-      if (!currentUser)
-        throw new Error("User must be logged in to create a match");
+    if (!currentUser)
+      throw new Error("User must be logged in to create a match");
 
-      const alreadyFriends = friends.find((item) => item.uid === invitedBy.uid);
+    await remove(
+      ref(
+        database,
+        "invitations_sent/" + currentUser.uid + "/invitations/" + invitationId
+      )
+    );
+  }
   
-      if (alreadyFriends) {
-        await removeInvitation(invitationId);
-        return;
-      }
-  
-      const friendSenderRef = ref(database, "players/" + invitedBy.uid);
-      const friendSender = await get(friendSenderRef)
+  async function acceptFriendshipInvitation(invitedBy: Friend, invitationId: string) {
+    if (!currentUser)
+      throw new Error("User must be logged in to create a match");
 
-      if (!friendSender.exists()) throw new Error("Player does not exist");
+    const alreadyFriends = friends.find((item) => item.uid === invitedBy.uid);
 
-      const friendsOfPlayerWhoSentInvitation = friendSender.val().friends
-      const updatedFriendsOfPlayerWhoSentInvitation = friendsOfPlayerWhoSentInvitation ? [...friendsOfPlayerWhoSentInvitation, currentUser.uid] : [currentUser.uid]
-    
-      const updatedFriends = [...friends, invitedBy]
-      
-      const friendsIds = friends.map(item => item.uid)
-      const updatedFriendsIds = [...friendsIds, invitedBy.uid]
-
-      const currentPlayerRef = ref(database, "players/" + currentUser.uid);
-  
-      await update(currentPlayerRef, {
-        friends: updatedFriendsIds,
-      });
-
-      setFriends(updatedFriends)
-  
-      await update(friendSenderRef, {
-        friends: updatedFriendsOfPlayerWhoSentInvitation,
-      });
-
+    if (alreadyFriends) {
       await removeInvitation(invitationId);
+      return;
     }
+
+    const friendSenderRef = ref(database, "players/" + invitedBy.uid);
+    const friendSender = await get(friendSenderRef)
+
+    if (!friendSender.exists()) throw new Error("Player does not exist");
+
+    const friendsOfPlayerWhoSentInvitation = friendSender.val().friends
+    const updatedFriendsOfPlayerWhoSentInvitation = friendsOfPlayerWhoSentInvitation ? [...friendsOfPlayerWhoSentInvitation, currentUser.uid] : [currentUser.uid]
+  
+    const updatedFriends = [...friends, invitedBy]
+    
+    const friendsIds = friends.map(item => item.uid)
+    const updatedFriendsIds = [...friendsIds, invitedBy.uid]
+
+    const currentPlayerRef = ref(database, "players/" + currentUser.uid);
+
+    await update(currentPlayerRef, {
+      friends: updatedFriendsIds,
+    });
+
+    setFriends(updatedFriends)
+
+    await update(friendSenderRef, {
+      friends: updatedFriendsOfPlayerWhoSentInvitation,
+    });
+
+    await removeInvitation(invitationId);
+  }
+
+  async function removeFriend(friendId: string) {
+    if (!currentUser)
+      throw new Error("User must be logged in to create a match");
+
+    const userFriendsFiltered = friends.filter(friend => friend.uid !== friendId)
+
+    const userUpdated: User = {
+      ...currentUser,
+      friends: userFriendsFiltered.map(friend => friend.uid),
+    }
+
+    setCurrentUser(userUpdated);
+
+    const userRef = ref(database, "players/" + userUpdated.uid)
+
+    await update(userRef, {
+      friends: userUpdated.friends,
+    });
+
+    const friendRef = ref(database, "players/" + friendId)
+
+    const dataFriend = await get(friendRef)
+
+    if(!dataFriend.exists()) throw new Error("Friend not found");
+
+    const friend: User = {
+      uid: friendId,
+      displayName: dataFriend.val().displayName,
+      email: dataFriend.val().email,
+      photoURL: dataFriend.val().photoURL,
+      friends: dataFriend.val().friends,
+    }
+
+    const updatedFriends = friend.friends.filter(friend => friend !== currentUser.uid)
+
+    await update(friendRef, {
+      friends: updatedFriends,
+    })
+  }
 
   useEffect(() => {
     if (!currentUser) {
@@ -246,25 +287,50 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
       return;
     }
 
-    if (!currentUser.friends) {
-      setFriends([]);
-      return;
-    }
+    const userRef = ref(
+      database,
+      "players/" + currentUser.uid
+    );
 
-    currentUser.friends.map(async friend => {
+    const unsubscribe = onValue(userRef, (snapshot) => {
+      const data = snapshot.val();
 
-      const friendRef = ref(
-        database,
-        "players/" + friend
-      );
+      if (data) {
+        const dataUser: User = {
+            uid: currentUser.uid,
+            displayName: data.displayName,
+            email: data.email,
+            photoURL: data.photoURL,
+            friends: data.friends
+          }
 
-      const dataFriend = await get(friendRef)
+          const updatedFriends: Friend[] = [];
 
-      if(!dataFriend.exists()) return
+          const userFriends = dataUser.friends ?? []
 
-      const friendData = dataFriend.val();
-      setFriends(prevFriends => [...prevFriends, { uid: friend, displayName: friendData?.displayName, email: friendData?.email, photoURL: friendData?.photoURL }]);
-    })
+          userFriends.map(async friend => {
+
+            const friendRef = ref(
+              database,
+              "players/" + friend
+            );
+      
+            const dataFriend = await get(friendRef)
+      
+            if(!dataFriend.exists()) return
+      
+            const friendData = dataFriend.val();
+
+            updatedFriends.push({ uid: friend, displayName: friendData?.displayName, email: friendData?.email, photoURL: friendData?.photoURL })
+          })
+
+          setFriends(updatedFriends);
+      } else {
+        setFriends([]);
+      }
+    });
+
+    return () => unsubscribe();
   }, [currentUser]);
 
   const value = {
@@ -275,7 +341,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
     logout,
     friends,
     inviteFriend,
-    acceptFriendshipInvitation
+    acceptFriendshipInvitation,
+    removeFriend
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
