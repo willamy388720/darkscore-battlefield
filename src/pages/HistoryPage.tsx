@@ -2,7 +2,7 @@ import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../contexts/AuthContext";
 import Navbar from "../components/Navbar";
-import MatchList from "../components/MatchList";
+import MatchListHistory from "@/components/MatchListHistory";
 
 const HistoryPage = () => {
   const { currentUser, loading } = useAuth();
@@ -46,7 +46,7 @@ const HistoryPage = () => {
             quais foram as pontuações finais.
           </p>
 
-          <MatchList isHistory={true} />
+          <MatchListHistory />
         </div>
       </div>
     </div>
