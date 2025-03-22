@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Gamepad, History } from "lucide-react";
 
 const Index = () => {
-  const { currentUser, loading } = useAuth();
+  const { currentUser, loading, signInWithGoogle } = useAuth();
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -21,7 +21,7 @@ const Index = () => {
         <Navbar />
 
         <div className="flex flex-col items-center justify-center py-16">
-          <h1 className="text-4xl font-game neon-text text-center mb-6">
+          <h1 className="text-2xl sm:text-4xl font-game neon-text text-center mb-6">
             DARKSCORE BATTLEFIELD
           </h1>
           <p className="text-xl text-muted-foreground text-center max-w-2xl mb-12">
@@ -43,12 +43,6 @@ const Index = () => {
                   pontuações em tempo real. Perfeito para noites de jogos e
                   torneios.
                 </p>
-                <Button
-                  onClick={() => navigate("/dashboard")}
-                  className="game-button mt-auto"
-                >
-                  Começar
-                </Button>
               </div>
 
               <div className="game-card flex flex-col items-center text-center">
@@ -62,12 +56,6 @@ const Index = () => {
                   Mantenha um registro de todas as suas partidas anteriores e
                   veja quem é o campeão definitivo ao longo do tempo.
                 </p>
-                <Button
-                  onClick={() => navigate("/history")}
-                  className="game-button mt-auto"
-                >
-                  Ver histórico
-                </Button>
               </div>
             </div>
           </div>
@@ -77,7 +65,7 @@ const Index = () => {
               Pronto para começar a monitorar suas pontuações nos jogos?
             </p>
             <Button
-              onClick={() => navigate("/dashboard")}
+              onClick={signInWithGoogle}
               className="game-button text-lg px-8 py-6"
             >
               Faça login e comece a jogar
