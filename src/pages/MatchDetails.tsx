@@ -23,8 +23,16 @@ const MatchDetails = () => {
 
   const handleScreenshot = async () => {
     if (!printRef.current) return;
-
-    // Garante que imagens externas sejam renderizadas corretamente
+  
+    // Salva os estilos originais
+    const originalStyle = printRef.current.style.cssText;
+    // Move o elemento para fora da tela (mas ainda renderizado)
+    printRef.current.style.position = "absolute";
+    printRef.current.style.left = "-9999px";
+    printRef.current.style.top = "0";
+    printRef.current.style.display = "block";
+  
+    // Aguarda que todas as imagens dentro do elemento carreguem
     const allImages = printRef.current.getElementsByTagName("img");
     for (let img of allImages) {
       if (!img.complete) {
@@ -34,18 +42,31 @@ const MatchDetails = () => {
         });
       }
     }
-
-    // Captura o componente como imagem
+  
+    // Opcional: Use as dimensões reais do elemento para o canvas
     const canvas = await html2canvas(printRef.current, {
-      backgroundColor: "#121212", // Define um fundo para evitar fundo branco
-      scale: 3, // Aumenta a qualidade da imagem
-      useCORS: true, // Permite capturar imagens externas
+      backgroundColor: "#121212",
+      scale: 3,
+      useCORS: true,
+      windowWidth: printRef.current.offsetWidth,
+      windowHeight: printRef.current.offsetHeight,
+      ignoreElements: (element) => {
+        // Ignora imagens problemáticas do Google
+        if (element.tagName === "IMG") {
+          const src = element.getAttribute("src");
+          if (src && src.includes("lh3.googleusercontent.com")) {
+            return true;
+          }
+        }
+        return false;
+      },
     });
-
-    // Converte o canvas para URL de imagem
+  
+    // Restaura os estilos originais
+    printRef.current.style.cssText = originalStyle;
+  
+    // Converte o canvas para imagem e dispara o download
     const image = canvas.toDataURL("image/png");
-
-    // Cria um link para download da imagem
     const link = document.createElement("a");
     link.href = image;
     link.download = "classificacao.png";
@@ -165,12 +186,14 @@ const MatchDetails = () => {
                           {index === 0 && (
                             <span className="text-yellow-400 text-lg">👑</span>
                           )}
+
                           {index !== 0 && (
                             <span className="text-muted-foreground">
                               #{index + 1}
                             </span>
                           )}
                         </div>
+
                         <div className="flex items-center flex-1">
                           <img
                             src={player.photoURL || "/placeholder.svg"}
@@ -179,6 +202,7 @@ const MatchDetails = () => {
                           />
                           <span className="text-white">{player.name}</span>
                         </div>
+                        
                         <div className="text-neon-green font-cyber">
                           {player.score}
                         </div>
@@ -197,7 +221,7 @@ const MatchDetails = () => {
               )}
             </div>
 
-            <div style={{ display: "none" }}>
+            <div style={{ position: "absolute", left: -99999 }}>
               <div ref={printRef} className="game-card mt-6">
                 <h3 className="text-lg font-cyber mb-4 text-white">
                   Classificação da partida {match.title}
