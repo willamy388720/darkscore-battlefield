@@ -1,9 +1,8 @@
 import { useNavigate } from "react-router-dom";
-import { useMatch, Match } from "../contexts/MatchContext";
+import { useMatch } from "../contexts/MatchContext";
 import { Button } from "@/components/ui/button";
-import { CalendarClock, Users, Trophy, Clock } from "lucide-react";
+import { CalendarClock, Users } from "lucide-react";
 import { format } from "date-fns";
-import { getGameDuration } from "@/lib/utils";
 
 const MatchList = () => {
   const { matches, isLoading } = useMatch();
@@ -58,7 +57,7 @@ const MatchList = () => {
             <span>{format(match.createdAt, "MMM d, yyyy 'às' h:mm a")}</span>
           </div>
 
-          <div className="flex justify-between items-center">
+          <div className="flex flex-col sm:flex-row gap-3 sm:gap-0 justify-between sm:items-center">
             <div className="flex items-center">
               <Users size={16} className="mr-2 text-muted-foreground" />
               <span className="text-muted-foreground">

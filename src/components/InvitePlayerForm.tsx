@@ -126,7 +126,7 @@ const InvitePlayerForm = ({ matchId }: InvitePlayerFormProps) => {
             <Button
               type="button"
               disabled={isLoading}
-              className="game-button flex items-center gap-2 mb-2 w-full"
+              className="bg-neon-green/100 hover:bg-neon-green/90 flex items-center gap-2 mb-2 w-full"
             >
               <Users size={16} />
               <span>Convidar da lista de amigos</span>
@@ -179,7 +179,7 @@ const InvitePlayerForm = ({ matchId }: InvitePlayerFormProps) => {
         
         <h3 className="text-sm font-cyber mb-2 text-muted-foreground text-center">OU</h3>
         
-        <div className="flex gap-2">
+        <div className="flex flex-col sm:flex-row gap-2">
           <Input
             value={email}
             onChange={(e) => setEmail(e.target.value)}
@@ -190,7 +190,7 @@ const InvitePlayerForm = ({ matchId }: InvitePlayerFormProps) => {
           <Button
             type="submit"
             disabled={isLoading}
-            className="game-button flex items-center gap-2"
+            className="bg-neon-green/100 hover:bg-neon-green/90 flex items-center gap-2"
           >
             <UserPlus size={16} />
             <span>{isLoading ? "Convidando..." : "Convidar"}</span>

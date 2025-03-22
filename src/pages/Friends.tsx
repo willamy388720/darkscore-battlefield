@@ -1,7 +1,5 @@
 import { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
 import { Friend, Invitation, useAuth } from "../contexts/AuthContext";
-import Navbar from "../components/Navbar";
 import { Button } from "@/components/ui/button";
 import { GamepadIcon, User, UserPlus, UserXIcon } from "lucide-react";
 import { Match, useMatch } from "@/contexts/MatchContext";
@@ -19,12 +17,9 @@ const Friends = () => {
   const [isInvitationConfrontation, setInvitationConfrontation] = useState(false)
   const [currentFriend, setCurrentFriend] = useState<Friend | null>(null)
 
-
-  const { currentUser, loading, friends, inviteFriend, removeFriend } = useAuth();
+  const { currentUser, friends, inviteFriend, removeFriend } = useAuth();
   const { matches, invitePlayer, history } = useMatch();
   const { toast } = useToast();
-
-  const navigate = useNavigate();
 
   const matchesWithoutTheFriend = currentFriend ? matches.filter(match => match.active && !match.players.some(player => player.id === currentFriend.uid)) : []
 
@@ -164,7 +159,7 @@ const Friends = () => {
           e.preventDefault();
           handleInviteMatch(matchId)
         }}
-        className="game-button flex items-center gap-2"
+        className="game-button flex items-center gap-2 w-full sm:w-fit"
       >
         <UserPlus size={16} />
         <span>{isLoading ? "Convidando..." : "Convidar"}</span>
@@ -209,29 +204,6 @@ const Friends = () => {
     
 }, [currentUser, currentFriend]);
 
-  useEffect(() => {
-    if (!loading && !currentUser) {
-      navigate("/");
-    }
-  }, [currentUser, loading, navigate]);
-
-  if (loading) {
-    return (
-      <div className="min-h-screen">
-        <div className="container mx-auto px-4">
-          <Navbar />
-          <div className="flex items-center justify-center h-64">
-            <p className="text-muted-foreground">Carregando...</p>
-          </div>
-        </div>
-      </div>
-    );
-  }
-
-  if (!currentUser) {
-    return null; // Will redirect to home
-  }
-
   return (
     <Dialog>
       <DialogPortal>
@@ -242,7 +214,7 @@ const Friends = () => {
           
           {!isInvitationConfrontation && 
             <form onSubmit={handleSubmit}>
-              <div className="flex gap-2 mt-4">
+              <div className="flex flex-col sm:flex-row gap-2 mt-4">
                 <Input
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
@@ -250,6 +222,7 @@ const Friends = () => {
                   className="bg-background/50 border-neon-purple/30 text-white flex-1"
                   required
                 />
+
                 <Button
                   type="submit"
                   disabled={isLoading}
@@ -263,10 +236,10 @@ const Friends = () => {
           }
 
           {isInvitationConfrontation && matchesWithoutTheFriend.map(match => (
-            <div key={match.id} className="game-card flex gap-2 mt-4 items-center justify-between">
-              <div className="flex flex-col gap-1">
+            <div key={match.id} className="game-card flex flex-col sm:flex-row gap-3 sm:gap-2 mt-4 items-center justify-between">
+              <div className="flex flex-col gap-1 items-center sm:items-start">
                 <h2 className="text-base font-cyber text-white">
-                    Convidar para {match.title}
+                  Convidar para {match.title}
                 </h2>
 
                 <h2 className="text-sm font-cyber text-muted-foreground">
@@ -287,104 +260,112 @@ const Friends = () => {
         </DialogContent>
       </DialogPortal>
 
-      <div className="min-h-screen ">
-        <div className="container mx-auto px-4">
-          <Navbar />
+      <div className="game-card">
+        <h2 className="text-2xl font-cyber mb-6 text-white">
+          Seus Amigos
+        </h2>
+        <p className="text-muted-foreground mb-6">
+          Conecte-se com seus amigos e veja quem realmente é o melhor! 🤝🔥 Desafie, jogue e mostre sua superioridade!"
+        </p>
 
-          <div className="game-card">
-            <h2 className="text-2xl font-cyber mb-6 text-white">
-              Seus Amigos
-            </h2>
-            <p className="text-muted-foreground mb-6">
-              Conecte-se com seus amigos e veja quem realmente é o melhor! 🤝🔥 Desafie, jogue e mostre sua superioridade!"
-            </p>
-
-            {friends.length === 0 && (
-              <div className="text-center py-8">
-                <p className="text-muted-foreground mb-3">Nenhum amigo encontrado. Convide-os aqui.</p>
-                <DialogTrigger onClick={() => setInvitationConfrontation(false)}>
-                  <Button
-                    type="button"
-                    disabled={isLoading}
-                    className="game-button flex items-center gap-2 mb-2 w-full"
-                  >
-                    <User size={16} />
-                    <span>Convidar amigo</span>
-                  </Button>
-                </DialogTrigger>
-              </div>
-            )}
+        {friends.length === 0 && (
+          <div className="text-center py-8">
+            <p className="text-muted-foreground mb-3">Nenhum amigo encontrado. Convide-os aqui.</p>
+            <DialogTrigger className="w-full sm:w-fit" onClick={() => setInvitationConfrontation(false)}>
+              <Button
+                type="button"
+                disabled={isLoading}
+                className="game-button flex items-center gap-2 mb-2 w-full"
+              >
+                <User size={16} />
+                <span>Convidar amigo</span>
+              </Button>
+            </DialogTrigger>
+          </div>
+        )}
 
 
-            {friends.length > 0 && (
-              <>
-                <DialogTrigger className="mb-3" onClick={() => setInvitationConfrontation(false)}>
-                  <Button
-                    type="button"
-                    disabled={isLoading}
-                    className="game-button flex items-center gap-2 mb-2 w-full"
-                  >
-                    <User size={16} />
-                    <span>Convidar amigo</span>
-                  </Button>
-                </DialogTrigger>
+        {friends.length > 0 && (
+          <>
+            <DialogTrigger className="mb-5 w-full sm:w-fit" onClick={() => setInvitationConfrontation(false)}>
+              <Button
+                type="button"
+                disabled={isLoading}
+                className="game-button flex items-center gap-2 w-full sm:w-fit"
+              >
+                <User size={16} />
+                <span>Convidar amigo</span>
+              </Button>
+            </DialogTrigger>
 
-                <div className="space-y-4">
-                  {friends.map((friend) => (
-                    <div
-                      key={friend.uid}
-                      className={"game-card flex flex-col"}
-                    >
-                      <div className="flex items-center justify-between w-full">
-                        <div className="flex items-center">
-                          <img
-                            src={friend.photoURL || ""}
-                            alt={friend.displayName || "User"}
-                            className="w-8 h-8 rounded-full mr-2 border border-neon-purple/50"
-                          />
-                          <span className="text-lg font-cyber">
-                            {friend.displayName} 
+            <div className="space-y-4">
+              {friends.map((friend) => (
+                <div
+                  key={friend.uid}
+                  className={"game-card flex flex-col"}
+                >
+                  <div className="flex flex-col sm:flex-row gap-3 sm:gap-0 items-center justify-between w-full">
+                    <div className="flex items-center">
+                      <img
+                        src={friend.photoURL || ""}
+                        alt={friend.displayName || "User"}
+                        className="w-8 h-8 rounded-full mr-2 border border-neon-purple/50"
+                      />
+                      <span className="text-lg font-cyber">
+                        {friend.displayName} 
+                      </span>
+                    </div>
+
+                    <div className="flex flex-col sm:flex-row gap-3 w-full sm:w-fit sm:self-start">
+                      <DialogTrigger className="w-full sm:w-fit" onClick={() => {
+                        setInvitationConfrontation(true)
+                        setCurrentFriend(friend)
+                      }}>
+                        <Button
+                          className="text-sm bg-neon-green/100 hover:bg-neon-green/90 w-full sm:w-fit"
+                        >
+                          <GamepadIcon size={16}/> 
+                          <span className="hidden lg:block">
+                            Desafiar para um confronto
                           </span>
-                        </div>
+                          
+                          <span className="block sm:hidden">
+                            Desafiar
+                          </span>
+                        </Button>               
+                      </DialogTrigger>
 
-                        <div className="flex gap-3">
-                          <DialogTrigger onClick={() => {
-                            setInvitationConfrontation(true)
-                            setCurrentFriend(friend)
-                          }}>
-                            <Button
-                              className="text-sm bg-neon-green/100 hover:bg-neon-green/90"
-                            >
-                              <GamepadIcon size={16}/>Desafiar para um confronto
-                            </Button>               
-                          </DialogTrigger>
-
-                          <Button
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              handleRemoveFriend(friend.uid)
-                            }}
-                            className=" text-sm bg-destructive/100 hover:bg-destructive/90"
-                            >
-                            <UserXIcon size={16}/>Desfazer a amizade
-                          </Button>
-                        </div>
-                      </div>
-
-                      <div className="flex flex-col gap-2 mt-3">
-                        <span className="text-lg font-cyber">
-                          Histórico de Confrontos
+                      <Button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleRemoveFriend(friend.uid)
+                        }}
+                        className=" text-sm bg-destructive/100 hover:bg-destructive/90"
+                      >
+                        <UserXIcon size={16}/>
+                        <span className="hidden lg:block">
+                          Desfazer a amizade
                         </span>
 
-                        {getStatisticsOfTheConfrontation(friend)}
-                      </div>
+                        <span className="block sm:hidden">
+                          Desfazer a amizade
+                        </span>
+                      </Button>
                     </div>
-                  ))}
+                  </div>
+
+                  <div className="flex flex-col gap-2 mt-3">
+                    <span className="text-lg font-cyber">
+                      Histórico de Confrontos
+                    </span>
+
+                    {getStatisticsOfTheConfrontation(friend)}
+                  </div>
                 </div>
-              </>
-            )}
-          </div>
-        </div>
+              ))}
+            </div>
+          </>
+        )}
       </div>
     </Dialog>
   );

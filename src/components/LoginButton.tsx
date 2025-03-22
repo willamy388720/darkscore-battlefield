@@ -1,5 +1,5 @@
 import { useAuth } from "../contexts/AuthContext";
-import { Lock } from "lucide-react";
+import { Lock, LogOut } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 const LoginButton = () => {
@@ -9,7 +9,8 @@ const LoginButton = () => {
     <div>
       {currentUser ? (
         <Button variant="outline" onClick={logout} className="game-button">
-          Logout
+          <LogOut size={16}/>
+          <span>Sair</span>
         </Button>
       ) : (
         <Button

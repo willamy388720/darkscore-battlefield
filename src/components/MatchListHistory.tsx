@@ -66,7 +66,7 @@ const MatchListHistory = () => {
                         </span>
                     </div>
 
-                    <div className="flex justify-between items-center w-full players-and-wins">
+                    <div className="flex flex-col sm:flex-row justify-between gap-2 sm:gap-0 sm:items-center w-full players-and-wins">
                         <div className="flex items-center">
                             <Users size={16} className="mr-2 text-muted-foreground" />
                             <span className="text-muted-foreground">

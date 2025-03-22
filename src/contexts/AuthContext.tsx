@@ -36,9 +36,10 @@ interface AuthContextType {
   friends: Friend[];
   signInWithGoogle: () => Promise<void>;
   logout: () => Promise<void>;
-  inviteFriend: (playerEmail: string) => Promise<void>
-  acceptFriendshipInvitation: (invitedBy: Friend, invitationId: string) => Promise<void>
-  removeFriend: (friendId: string) => Promise<void>
+  inviteFriend: (playerEmail: string) => Promise<void>;
+  acceptFriendshipInvitation: (invitedBy: Friend, invitationId: string) => Promise<void>;
+  removeFriend: (friendId: string) => Promise<void>;
+  removeInvitation: (invitationId: string) => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -342,7 +343,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
     friends,
     inviteFriend,
     acceptFriendshipInvitation,
-    removeFriend
+    removeFriend,
+    removeInvitation
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

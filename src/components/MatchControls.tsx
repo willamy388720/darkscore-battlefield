@@ -68,7 +68,7 @@ const MatchControls = ({ matchId }: MatchControlsProps) => {
   };
 
   return (
-    <div className="flex gap-4 mt-6">
+    <div className="flex flex-col sm:flex-row gap-4 mt-6">
       <Button
         onClick={handleResetScores}
         disabled={isResetting}

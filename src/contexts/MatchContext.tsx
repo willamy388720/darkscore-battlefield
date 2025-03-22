@@ -37,6 +37,7 @@ interface MatchContextType {
   endMatch: (matchId: string) => Promise<void>;
   deleteMatch: (matchId: string) => Promise<void>;
   setCurrentMatch: (match: Match | null) => void;
+  removeInvitation: (matchId: string) => Promise<void>;
   setMatches: React.Dispatch<React.SetStateAction<Match[]>>;
   setHistory: React.Dispatch<React.SetStateAction<Match[]>>;
 }
@@ -424,6 +425,7 @@ export const MatchProvider: React.FC<{ children: React.ReactNode }> = ({
     setMatches,
     setHistory,
     acceptInvitation,
+    removeInvitation
   };
 
   return (
