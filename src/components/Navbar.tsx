@@ -178,6 +178,8 @@ const Navbar = () => {
                 </div>
               </>
             )}
+
+            <LoginButton />
           </div>
         </div>
       }

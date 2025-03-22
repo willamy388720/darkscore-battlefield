@@ -38,7 +38,7 @@ const Index = () => {
                 <h2 className="text-xl font-cyber text-white mb-4">
                   Criar Partidas
                 </h2>
-                <p className="text-muted-foreground mb-6">
+                <p className="text-muted-foreground">
                   Configure uma nova partida, convide jogadores e acompanhe as
                   pontuações em tempo real. Perfeito para noites de jogos e
                   torneios.
@@ -52,7 +52,7 @@ const Index = () => {
                 <h2 className="text-xl font-cyber text-white mb-4">
                   Histórico de partidas
                 </h2>
-                <p className="text-muted-foreground mb-6">
+                <p className="text-muted-foreground">
                   Mantenha um registro de todas as suas partidas anteriores e
                   veja quem é o campeão definitivo ao longo do tempo.
                 </p>
