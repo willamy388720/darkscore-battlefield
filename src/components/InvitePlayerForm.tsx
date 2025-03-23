@@ -138,7 +138,7 @@ const InvitePlayerForm = ({ matchId }: InvitePlayerFormProps) => {
             <DialogContent>
               <DialogTitle>Convidar Amigos</DialogTitle>
 
-              <div className="mt-3">
+              <div className="flex flex-col gap-3 mt-3">
                 {players.length === 0 && 
                   <h2 className="text-lg font-cyber text-muted-foreground">
                     Todos seus amigos já estão na partida.
@@ -146,7 +146,7 @@ const InvitePlayerForm = ({ matchId }: InvitePlayerFormProps) => {
                 }
 
                 {players.map(friend => (
-                  <div key={friend.uid} className="flex items-center justify-between">
+                  <div key={friend.uid} className="game-card flex items-center justify-between">
                     <div className="flex items-center flex-1">
                       <img
                         src={friend.photoURL || "/placeholder.svg"}

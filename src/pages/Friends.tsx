@@ -235,22 +235,24 @@ const Friends = () => {
             </form>
           }
 
-          {isInvitationConfrontation && matchesWithoutTheFriend.map(match => (
-            <div key={match.id} className="game-card flex flex-col sm:flex-row gap-3 sm:gap-2 mt-4 items-center justify-between">
-              <div className="flex flex-col gap-1 items-center sm:items-start">
-                <h2 className="text-base font-cyber text-white">
-                  Convidar para {match.title}
-                </h2>
+          <div className="flex flex-col gap-3">
+            {isInvitationConfrontation && matchesWithoutTheFriend.map(match => (
+                <div key={match.id} className="game-card flex flex-col sm:flex-row gap-3 sm:gap-2 items-center justify-between">
+                  <div className="flex flex-col gap-1 items-center sm:items-start">
+                    <h2 className="text-base font-cyber text-white">
+                      Convidar para {match.title}
+                    </h2>
 
-                <h2 className="text-sm font-cyber text-muted-foreground">
-                  Jogando {match.gameTitle}.
-                </h2>
-              </div>
+                    <h2 className="text-sm font-cyber text-muted-foreground">
+                      Jogando {match.gameTitle}.
+                    </h2>
+                  </div>
 
-              {alreadyBeenInvited(match.id)}
-            </div>
-          ))
-          }
+                  {alreadyBeenInvited(match.id)}
+                </div>
+              ))
+            }
+          </div>
 
           {isInvitationConfrontation && matchesWithoutTheFriend.length === 0 &&
             <h2 className="text-lg font-cyber text-muted-foreground">
