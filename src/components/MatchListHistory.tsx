@@ -36,7 +36,7 @@ const MatchListHistory = () => {
         >
             <AccordionHeader>
                 <AccordionTrigger className="flex flex-col w-full items-start" style={{textDecoration: "none"}}>
-                    <div className="flex justify-between items-start mb-3 w-full">
+                    <div className="flex flex-col sm:flex-row gap-3 sm:gap-0 justify-between items-center sm:items-start mb-3 w-full">
                         <h3 className="font-game neon-text text-white text-lg">
                             {match.title}
                         </h3>
