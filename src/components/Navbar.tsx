@@ -2,7 +2,15 @@ import { useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from "../contexts/AuthContext";
 import LoginButton from "./LoginButton";
 import { Button } from "@/components/ui/button";
-import { GamepadIcon, HistoryIcon, HomeIcon, MailIcon, Menu, UsersIcon, X } from "lucide-react";
+import {
+  GamepadIcon,
+  HistoryIcon,
+  HomeIcon,
+  MailIcon,
+  Menu,
+  UsersIcon,
+  X,
+} from "lucide-react";
 import { useEffect, useState } from "react";
 
 const Navbar = () => {
@@ -18,29 +26,42 @@ const Navbar = () => {
     } else {
       document.body.classList.remove("overflow-hidden");
     }
-  }, [isOpenMenu])
+  }, [isOpenMenu]);
 
   return (
     <nav className={`flex justify-between items-center pb-4 mb-8`}>
       <div className="flex items-center">
-        <h1 className="lg:text-xl xl:text-2xl  font-game neon-text mr-8">DARKSCORE</h1>
+        <h1 className="lg:text-xl xl:text-2xl  font-game neon-text mr-8">
+          DARKSCORE
+        </h1>
 
         <div className="hidden xl:flex space-x-4">
-          {!currentUser && <Button
-            variant="ghost"
-            onClick={() => navigate("/")}
-            className={`flex items-center gap-2 font-cyber ${location.pathname === "/" ? "text-white" : "text-muted-foreground hover:text-white"}`}
-          >
-            <HomeIcon size={16} />
-            <span>Home</span>
-          </Button>}
+          {!currentUser && (
+            <Button
+              variant="ghost"
+              onClick={() => navigate("/")}
+              className={`flex items-center gap-2 font-cyber ${
+                location.pathname === "/"
+                  ? "text-white"
+                  : "text-muted-foreground hover:text-white"
+              }`}
+            >
+              <HomeIcon size={16} />
+              <span>Home</span>
+            </Button>
+          )}
 
           {currentUser && (
             <>
               <Button
                 variant="ghost"
                 onClick={() => navigate("/dashboard")}
-                className={`flex items-center gap-2 font-cyber ${location.pathname.includes("dashboard") || location.pathname.includes("match") ? "text-white" : "text-muted-foreground hover:text-white"}`}
+                className={`flex items-center gap-2 font-cyber ${
+                  location.pathname.includes("dashboard") ||
+                  location.pathname.includes("match")
+                    ? "text-white"
+                    : "text-muted-foreground hover:text-white"
+                }`}
               >
                 <GamepadIcon size={16} />
                 <span>Partidas</span>
@@ -49,7 +70,11 @@ const Navbar = () => {
               <Button
                 variant="ghost"
                 onClick={() => navigate("/history")}
-                className={`flex items-center gap-2 font-cyber ${location.pathname.includes("history") ? "text-white" : "text-muted-foreground hover:text-white"}`}
+                className={`flex items-center gap-2 font-cyber ${
+                  location.pathname.includes("history")
+                    ? "text-white"
+                    : "text-muted-foreground hover:text-white"
+                }`}
               >
                 <HistoryIcon size={16} />
                 <span>Histórico</span>
@@ -58,7 +83,11 @@ const Navbar = () => {
               <Button
                 variant="ghost"
                 onClick={() => navigate("/friends")}
-                className={`flex items-center gap-2 font-cyber ${location.pathname.includes("friends") ? "text-white" : "text-muted-foreground hover:text-white"}`}
+                className={`flex items-center gap-2 font-cyber ${
+                  location.pathname.includes("friends")
+                    ? "text-white"
+                    : "text-muted-foreground hover:text-white"
+                }`}
               >
                 <UsersIcon size={16} />
                 <span>Amigos</span>
@@ -67,7 +96,11 @@ const Navbar = () => {
               <Button
                 variant="ghost"
                 onClick={() => navigate("/invitations")}
-                className={`flex items-center gap-2 font-cyber ${location.pathname.includes("invitations") ? "text-white" : "text-muted-foreground hover:text-white"}`}
+                className={`flex items-center gap-2 font-cyber ${
+                  location.pathname.includes("invitations")
+                    ? "text-white"
+                    : "text-muted-foreground hover:text-white"
+                }`}
               >
                 {invitations.length > 0 && (
                   <span className="flex rounded-full bg-red-500 text-white w-6 h-6 items-center justify-center">
@@ -80,8 +113,6 @@ const Navbar = () => {
             </>
           )}
         </div>
-
-        
       </div>
 
       <div className="flex items-center gap-4">
@@ -101,30 +132,45 @@ const Navbar = () => {
         <div className="hidden xl:block">
           <LoginButton />
         </div>
-      
-        <div className="flex xl:hidden">
-          <Menu size={26} onClick={() => setIsOpenMenu(true)} className="cursor-pointer" />
+
+        <div className="flex xl:hidden relative">
+          {invitations.length > 0 && (
+            <span className="absolute  top-0 right-0 flex rounded-full bg-red-500 text-white w-3 h-3 items-center justify-center"></span>
+          )}
+
+          <Menu
+            size={26}
+            onClick={() => setIsOpenMenu(true)}
+            className="cursor-pointer"
+          />
         </div>
       </div>
 
-
-      {isOpenMenu &&
+      {isOpenMenu && (
         <div className="bg-background absolute h-screen w-screen z-10 top-0 left-0 p-4 flex flex-col items-center">
-          <X size={26} onClick={() => setIsOpenMenu(false)} className="cursor-pointer self-end" />
+          <X
+            size={26}
+            onClick={() => setIsOpenMenu(false)}
+            className="cursor-pointer self-end"
+          />
 
           <div className="flex flex-col gap-4">
-            {!currentUser && 
+            {!currentUser && (
               <div
                 onClick={() => {
                   setIsOpenMenu(false);
                   navigate("/");
                 }}
-                className={`flex items-center gap-2 font-cyber text-xl ${location.pathname === "/" ? "text-white" : "text-muted-foreground hover:text-white"}`}
+                className={`flex items-center gap-2 font-cyber text-xl ${
+                  location.pathname === "/"
+                    ? "text-white"
+                    : "text-muted-foreground hover:text-white"
+                }`}
               >
                 <HomeIcon size={26} />
                 <span>Home</span>
               </div>
-            }
+            )}
 
             {currentUser && (
               <>
@@ -133,7 +179,12 @@ const Navbar = () => {
                     setIsOpenMenu(false);
                     navigate("/dashboard");
                   }}
-                  className={`flex items-center gap-2 font-cyber text-xl ${location.pathname.includes("dashboard") || location.pathname.includes("match") ? "text-white" : "text-muted-foreground hover:text-white"}`}
+                  className={`flex items-center gap-2 font-cyber text-xl ${
+                    location.pathname.includes("dashboard") ||
+                    location.pathname.includes("match")
+                      ? "text-white"
+                      : "text-muted-foreground hover:text-white"
+                  }`}
                 >
                   <GamepadIcon size={26} />
                   <span>Partidas</span>
@@ -144,7 +195,11 @@ const Navbar = () => {
                     setIsOpenMenu(false);
                     navigate("/history");
                   }}
-                  className={`flex items-center gap-2 font-cyber text-xl ${location.pathname.includes("history") ? "text-white" : "text-muted-foreground hover:text-white"}`}
+                  className={`flex items-center gap-2 font-cyber text-xl ${
+                    location.pathname.includes("history")
+                      ? "text-white"
+                      : "text-muted-foreground hover:text-white"
+                  }`}
                 >
                   <HistoryIcon size={26} />
                   <span>Histórico</span>
@@ -155,7 +210,11 @@ const Navbar = () => {
                     setIsOpenMenu(false);
                     navigate("/friends");
                   }}
-                  className={`flex items-center gap-2 font-cyber text-xl ${location.pathname.includes("friends") ? "text-white" : "text-muted-foreground hover:text-white"}`}
+                  className={`flex items-center gap-2 font-cyber text-xl ${
+                    location.pathname.includes("friends")
+                      ? "text-white"
+                      : "text-muted-foreground hover:text-white"
+                  }`}
                 >
                   <UsersIcon size={26} />
                   <span>Amigos</span>
@@ -164,9 +223,13 @@ const Navbar = () => {
                 <div
                   onClick={() => {
                     setIsOpenMenu(false);
-                    navigate("/invitations")
+                    navigate("/invitations");
                   }}
-                  className={`flex items-center gap-2 font-cyber text-xl ${location.pathname.includes("invitations") ? "text-white" : "text-muted-foreground hover:text-white"}`}
+                  className={`flex items-center gap-2 font-cyber text-xl ${
+                    location.pathname.includes("invitations")
+                      ? "text-white"
+                      : "text-muted-foreground hover:text-white"
+                  }`}
                 >
                   {invitations.length > 0 && (
                     <span className="flex rounded-full bg-red-500 text-white w-6 h-6 items-center justify-center">
@@ -182,7 +245,7 @@ const Navbar = () => {
             <LoginButton />
           </div>
         </div>
-      }
+      )}
     </nav>
   );
 };
