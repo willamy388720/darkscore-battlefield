@@ -1,69 +1,91 @@
-# Welcome to your Lovable project
+# 🎮 Darkscore Battlefield
 
-## Project info
+**Darkscore Battlefield** é uma plataforma web para registrar partidas entre amigos, acompanhar placares e manter um histórico de confrontos. Ideal para quem leva a resenha a sério e quer saber, de forma definitiva, quem vence mais.
 
-**URL**: https://lovable.dev/projects/1fc10101-e484-4fb3-ba0c-62187f25f037
+## ✨ Funcionalidades
 
-## How can I edit this code?
+- ✅ Criação de partidas com múltiplos jogadores
+- ✅ Registro de resultados e vencedores
+- ✅ Histórico de confrontos entre amigos
+- ✅ Visualização de vitórias por jogador
+- ✅ Lista de amigos com destaque para rivalidades
+- ✅ Interface direta, responsiva e rápida
 
-There are several ways of editing your application.
+## 🧪 Tecnologias utilizadas
 
-**Use Lovable**
+- **React** – SPA moderna e performática
+- **TypeScript** – Tipagem estática para maior segurança
+- **Firebase** – Autenticação, Firestore e Realtime Database
+- **Vite** – Build e dev server ultrarrápido
 
-Simply visit the [Lovable Project](https://lovable.dev/projects/1fc10101-e484-4fb3-ba0c-62187f25f037) and start prompting.
+## 🚀 Como rodar o projeto localmente
 
-Changes made via Lovable will be committed automatically to this repo.
+### 1. Clone o repositório
 
-**Use your preferred IDE**
+```bash
+git clone https://github.com/seu-usuario/darkscore-battlefield.git
+cd darkscore-battlefield
+```
 
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
+### 2. Instale as dependências
 
-The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
+```bash
+npm install
+```
 
-Follow these steps:
+### 3. Configure suas variáveis de ambiente
 
-```sh
-# Step 1: Clone the repository using the project's Git URL.
-git clone <YOUR_GIT_URL>
+# Define o ambiente (dev ou production)
 
-# Step 2: Navigate to the project directory.
-cd <YOUR_PROJECT_NAME>
+```env
+WEB_ENV=dev
+```
 
-# Step 3: Install the necessary dependencies.
-npm i
+# Firebase
 
-# Step 4: Start the development server with auto-reloading and an instant preview.
+```env
+API_KEY=XXXXXXXXXXXXXXXXXXXXXXXX
+AUTH_DOMAIN=seu-projeto.firebaseapp.com
+PROJECT_ID=seu-projeto
+STORAGE_BUCKET=seu-projeto.appspot.com
+MESSAGING_SENDER_ID=XXXXXXXXXXXX
+API_ID=1:XXXXXXXXXXXX:web:XXXXXXXXXXXXXXXX
+MEASUREMENT_ID=G-XXXXXXXXXX
+```
+
+# URLs do Firebase Realtime Database
+
+```env
+DATABASE_URL_DEVELOPMENT=https://seu-projeto.firebaseio.com
+DATABASE_URL_PRODUCTION=https://seu-projeto.firebaseio.com
+```
+
+### 4. Inicie o servidor local
+
+```bash
 npm run dev
 ```
 
-**Edit a file directly in GitHub**
+Acesse http://localhost:8080 no navegador para ver o projeto em ação.
 
-- Navigate to the desired file(s).
-- Click the "Edit" button (pencil icon) at the top right of the file view.
-- Make your changes and commit the changes.
+## 📦 Estrutura do projeto
 
-**Use GitHub Codespaces**
+```bash
+src/
+├── components/       # Componentes reutilizáveis da interface
+├── contexts/         # Contextos React para estado global
+├── dtos/             # Data Transfer Objects e tipos
+├── env/              # Configurações e variáveis de ambiente
+├── hooks/            # Hooks personalizados
+├── libs/             # Serviços e libs, incluindo configuração do Firebase
+├── pages/            # Páginas principais do app
+└── routes/           # Configuração das rotas do app
+```
 
-- Navigate to the main page of your repository.
-- Click on the "Code" button (green button) near the top right.
-- Select the "Codespaces" tab.
-- Click on "New codespace" to launch a new Codespace environment.
-- Edit files directly within the Codespace and commit and push your changes once you're done.
+## 📌 Observações
 
-## What technologies are used for this project?
+- O projeto utiliza lógica personalizada para exibir vitórias entre amigos com base no histórico de partidas.
 
-This project is built with .
+- Ideal para grupos de jogos (board games, futebol, games online etc).
 
-- Vite
-- TypeScript
-- React
-- shadcn-ui
-- Tailwind CSS
-
-## How can I deploy this project?
-
-Simply open [Lovable](https://lovable.dev/projects/1fc10101-e484-4fb3-ba0c-62187f25f037) and click on Share -> Publish.
-
-## I want to use a custom domain - is that possible?
-
-We don't support custom domains (yet). If you want to deploy your project under your own domain then we recommend using Netlify. Visit our docs for more details: [Custom domains](https://docs.lovable.dev/tips-tricks/custom-domain/)
+- Todos os dados são salvos na nuvem com Firebase.
